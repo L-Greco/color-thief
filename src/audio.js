@@ -33,18 +33,18 @@ class Audio {
 }
 
 const CARD_DRAW_SOUND = [
-  0.22, // volume
-  0.04, // randomness
-  520, // frequency
-  0.005, // attack
-  0.02, // sustain
-  0.08, // release
-  1, // shape: triangle
-  1, // shapeCurve
-  140, // slide
-  0, // deltaSlide
-  0, // pitchJump
-  0, // pitchJumpTime
-  0, // repeatTime
-  0.08, // noise
+  0.22,
+  0.04,
+  520,
+  0.005,
+  0.02,
+  0.08,
+  1,
+  1,
+  140,
+  0,
+  0,
+  0,
+  0,
+  0.08,
 ];

@@ -1,5 +1,4 @@
 states = {
-  test: "Test",
   intro: "Intro",
   deckBuilding: "Deck Building",
   battle: "Battle",
