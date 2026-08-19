@@ -1,4 +1,5 @@
 class Player {
+  name = "Player";
   health = 20;
   maxHealth = 20;
 
@@ -7,6 +8,11 @@ class Player {
 
   deck = [];
   hand = [];
+  board = [];
+
+  constructor(name = "Player") {
+    this.name = name;
+  }
 
   setDeck(deck) {
     this.deck = deck;
@@ -15,9 +21,16 @@ class Player {
   drawCard() {
     const card = this.deck.pop();
 
-    if (!card) return;
+    if (!card) return null;
 
     this.hand.push(card);
+    return card;
+  }
+
+  drawCards(count) {
+    for (let i = 0; i < count; i += 1) {
+      this.drawCard();
+    }
   }
 
   takeDamage(amount) {

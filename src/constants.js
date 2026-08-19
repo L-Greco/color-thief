@@ -1,75 +1,21 @@
-cardConfigs = [
-  {
-    x: 300,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Unicorn",
-    cost: 2,
-  },
-  {
-    x: 450,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Dragon",
-    cost: 5,
-  },
-  {
-    x: 600,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Goblin",
-    cost: 1,
-  },
-  {
-    x: 300,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Unicorn",
-    cost: 2,
-  },
-  {
-    x: 450,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Dragon",
-    cost: 5,
-  },
-  {
-    x: 600,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Goblin",
-    cost: 1,
-  },
-  {
-    x: 750,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Unicorn",
-    cost: 2,
-  },
-  {
-    x: 900,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Dragon",
-    cost: 5,
-  },
-  {
-    x: 1050,
-    y: 470,
-    width: 120,
-    height: 168,
-    name: "Goblin",
-    cost: 1,
-  },
+CARD_WIDTH = 120;
+CARD_HEIGHT = 168;
+STARTING_HAND_SIZE = 4;
+MAX_BOARD_SIZE = 5;
+DEBUG_BORDERS = false;
+
+starterDeckConfig = [
+  { name: "Sunbeam Unicorn", cost: 2, attack: 2, health: 3, copies: 3 },
+  { name: "Prism Dragon", cost: 5, attack: 5, health: 4, copies: 2 },
+  { name: "Rainbow Goblin", cost: 1, attack: 1, health: 2, copies: 4 },
 ];
+
+BATTLE_LAYOUT = {
+  enemyStatus: [0, 0, 1280, 60],
+  enemyBoard: [0, 60, 1280, 190],
+  playerBoard: [0, 250, 1280, 190],
+  playerHand: [0, 440, 1280, 220],
+  playerStatus: [0, 660, 1280, 60],
+};
+
 MAX_DELTA = 1000 / 30;

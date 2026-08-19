@@ -6,8 +6,8 @@ class Card {
   constructor(
     x = 0,
     y = 0,
-    width = 50,
-    height = 100,
+    width = CARD_WIDTH,
+    height = CARD_HEIGHT,
     name = "Unicorn",
     cost = 0,
     health = 2,
@@ -21,6 +21,10 @@ class Card {
     this.cost = cost;
     this.health = health;
     this.attack = attack;
+  }
+  setPosition(x, y) {
+    this.x = x;
+    this.y = y;
   }
   setHover(bool) {
     this.hovered = bool;
@@ -47,6 +51,12 @@ class Card {
     ctx.translate(centerX, centerY);
     ctx.scale(this.scale, this.scale);
     ctx.translate(-centerX, -centerY);
+
+    if (this.faceDown) {
+      this.drawCardBack();
+      ctx.restore();
+      return;
+    }
 
     ctx.fillStyle = "white";
     ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -104,5 +114,21 @@ class Card {
     );
 
     ctx.restore();
+  }
+
+  drawCardBack() {
+    ctx.fillStyle = "#6d5bd0";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.strokeStyle = "#2c1d63";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "#f8f3ff";
+    ctx.fillRect(this.x + 14, this.y + 14, this.width - 28, this.height - 28);
+    ctx.fillStyle = "#6d5bd0";
+    ctx.font = "18px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("COLOR", this.x + this.width / 2, this.y + this.height / 2 - 16);
+    ctx.fillText("THIEF", this.x + this.width / 2, this.y + this.height / 2 + 16);
   }
 }
