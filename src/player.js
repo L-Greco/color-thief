@@ -19,6 +19,8 @@ class Player {
   }
 
   drawCard() {
+    if (this.hand.length >= HAND_LIMIT) return null;
+
     const card = this.deck.pop();
 
     if (!card) return null;
@@ -29,7 +31,7 @@ class Player {
 
   drawCards(count) {
     for (let i = 0; i < count; i += 1) {
-      this.drawCard();
+      if (!this.drawCard()) break;
     }
   }
 

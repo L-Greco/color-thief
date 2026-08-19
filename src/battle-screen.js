@@ -104,7 +104,7 @@ class BattleScreen {
     ctx.fillText(`HP ${player.health}/${player.maxHealth}`, 220, centerY);
     ctx.fillText(`Mana ${player.mana}/${player.maxMana}`, 430, centerY);
     ctx.fillText(`Deck ${player.deck.length}`, 650, centerY);
-    ctx.fillText(`Hand ${player.hand.length}`, 840, centerY);
+    ctx.fillText(`Hand ${player.hand.length}/${HAND_LIMIT}`, 840, centerY);
   }
 
   drawDeckInfo(player, rect, hint) {
@@ -142,7 +142,11 @@ class BattleScreen {
     ctx.font = "16px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText("Debug draw: click a deck, or press D for player and E for enemy", 30, 410);
+    ctx.fillText(
+      `Debug draw: click a deck, or press D for player and E for enemy. Hand limit: ${HAND_LIMIT}`,
+      30,
+      410,
+    );
   }
 
   handleClick(point) {

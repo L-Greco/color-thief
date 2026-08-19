@@ -1,8 +1,11 @@
 CARD_WIDTH = 120;
 CARD_HEIGHT = 168;
-STARTING_HAND_SIZE = 4;
-MAX_BOARD_SIZE = 5;
 DEBUG_BORDERS = false;
+
+// Game rules
+STARTING_HAND_SIZE = 4;
+HAND_LIMIT = 7;
+MAX_BOARD_SIZE = 5;
 
 starterDeckConfig = [
   { name: "Sunbeam Unicorn", cost: 2, attack: 2, health: 3, copies: 3 },
