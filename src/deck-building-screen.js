@@ -4,6 +4,10 @@ class DeckBuildingScreen {
     this.selectedSource = playerDeckSources[0];
     this.selectedDeck = [];
     this.sourceDeckButtons = this.createSourceDeckButtons();
+    this.sourceCardsPage = 0;
+    this.cardsPerPage = 10;
+    this.prevPageRect = { x: 70, y: 660, width: 52, height: 36 };
+    this.nextPageRect = { x: 658, y: 660, width: 52, height: 36 };
     this.startBattleRect = { x: 930, y: 630, width: 250, height: 56 };
   }
 
@@ -28,6 +32,7 @@ class DeckBuildingScreen {
     this.drawTitle();
     this.drawSourceDeckButtons();
     this.drawSourceCards();
+    this.drawPagination();
     this.drawSelectedDeckPanel();
     this.drawStartBattleButton();
   }
@@ -111,7 +116,7 @@ class DeckBuildingScreen {
   }
 
   drawSourceCards() {
-    const cards = this.getSortedSourceCards();
+    const cards = this.getVisibleSourceCards();
     const startX = 70;
     const startY = 290;
     const columns = 5;
@@ -132,6 +137,39 @@ class DeckBuildingScreen {
       card.update(1 / 60);
       card.draw();
     });
+  }
+
+  drawPagination() {
+    const totalPages = this.getSourceCardsTotalPages();
+    const canGoPrev = this.sourceCardsPage > 0;
+    const canGoNext = this.sourceCardsPage < totalPages - 1;
+
+    this.drawPageButton(this.prevPageRect, "‹", canGoPrev);
+    this.drawPageButton(this.nextPageRect, "›", canGoNext);
+
+    ctx.fillStyle = "#4f4f4f";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      `${this.sourceCardsPage + 1}/${totalPages}`,
+      390,
+      this.prevPageRect.y + this.prevPageRect.height / 2,
+    );
+  }
+
+  drawPageButton(rect, label, enabled) {
+    const hovered = enabled && pointCollision(rect, mousePosition);
+    ctx.fillStyle = enabled ? (hovered ? "#8be67b" : "#f2f2f2") : "#dddddd";
+    ctx.beginPath();
+    ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 14);
+    ctx.fill();
+
+    ctx.fillStyle = enabled ? "#1f1f1f" : "#8a8a8a";
+    ctx.font = "bold 22px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, rect.x + rect.width / 2, rect.y + rect.height / 2 + 1);
   }
 
   drawSelectedDeckPanel() {
@@ -256,6 +294,15 @@ class DeckBuildingScreen {
       return "pointer";
     }
 
+    if (
+      (this.sourceCardsPage > 0 &&
+        pointCollision(this.prevPageRect, mousePosition)) ||
+      (this.sourceCardsPage < this.getSourceCardsTotalPages() - 1 &&
+        pointCollision(this.nextPageRect, mousePosition))
+    ) {
+      return "pointer";
+    }
+
     if (pointCollision(this.startBattleRect, mousePosition)) {
       return this.selectedDeck.length === DECK_SIZE ? "pointer" : "default";
     }
@@ -268,7 +315,7 @@ class DeckBuildingScreen {
   }
 
   findHoveredSourceCard() {
-    const cards = this.getSortedSourceCards();
+    const cards = this.getVisibleSourceCards();
     const startX = 70;
     const startY = 290;
     const columns = 5;
@@ -322,8 +369,25 @@ class DeckBuildingScreen {
 
       if (pointCollision(button.rect, point)) {
         this.selectedSource = button.source;
+        this.sourceCardsPage = 0;
         return true;
       }
+    }
+
+    if (
+      this.sourceCardsPage > 0 &&
+      pointCollision(this.prevPageRect, point)
+    ) {
+      this.sourceCardsPage -= 1;
+      return true;
+    }
+
+    if (
+      this.sourceCardsPage < this.getSourceCardsTotalPages() - 1 &&
+      pointCollision(this.nextPageRect, point)
+    ) {
+      this.sourceCardsPage += 1;
+      return true;
     }
 
     const hoveredSourceCard = this.findHoveredSourceCard();
@@ -360,5 +424,14 @@ class DeckBuildingScreen {
     return [...this.selectedSource.cards].sort(
       (a, b) => a.cost - b.cost || a.name.localeCompare(b.name),
     );
+  }
+
+  getVisibleSourceCards() {
+    const start = this.sourceCardsPage * this.cardsPerPage;
+    return this.getSortedSourceCards().slice(start, start + this.cardsPerPage);
+  }
+
+  getSourceCardsTotalPages() {
+    return max(1, ceil(this.getSortedSourceCards().length / this.cardsPerPage));
   }
 }
