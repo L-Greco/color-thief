@@ -14,6 +14,7 @@ class Card {
     health = 2,
     attack = 1,
     effects = [],
+    text = "",
   ) {
     this.x = x;
     this.y = y;
@@ -25,6 +26,7 @@ class Card {
     this.health = health;
     this.attack = attack;
     this.effects = effects;
+    this.text = text;
   }
   setPosition(x, y) {
     this.x = x;
@@ -126,28 +128,66 @@ class Card {
       this.x + this.width / 2,
       this.y + this.height / 3,
     );
-    if (this.type === "spell") {
-      ctx.font = "10px Arial";
-      ctx.fillText(
-        this.effectLabel(),
-        this.x + this.width / 2,
-        this.y + this.height / 2 + 12,
-      );
+    if (this.effects.length > 0) {
+      ctx.font = "9px Arial";
+      this.drawCenteredText(this.effectLabel(), this.y + this.height / 2 + 2, 10, 4);
     }
 
     ctx.restore();
   }
 
   effectLabel() {
+    if (this.text) return this.text;
+
     const primaryEffect = this.effects[0];
 
     if (!primaryEffect) return this.type;
-    if (primaryEffect.type === "draw") return `Draw ${primaryEffect.amount}`;
-    if (primaryEffect.type === "heal") return `Heal ${primaryEffect.amount}`;
-    if (primaryEffect.type === "damage") return `Deal ${primaryEffect.amount}`;
-    if (primaryEffect.type === "buff") return "Buff";
-    if (primaryEffect.type === "returnToHand") return "Bounce";
+    const triggerLabel = this.effectTriggerLabel(primaryEffect.trigger);
+    const effectLabel = this.primaryEffectLabel(primaryEffect);
+
+    return triggerLabel ? `${triggerLabel}: ${effectLabel}` : effectLabel;
+  }
+
+  effectTriggerLabel(trigger) {
+    if (trigger === "onPlay") return "On Play";
+    if (trigger === "onDeath") return "On Death";
+    return "";
+  }
+
+  primaryEffectLabel(effect) {
+    if (effect.type === "draw") return `Draw ${effect.amount}`;
+    if (effect.type === "heal") return `Heal ${effect.amount}`;
+    if (effect.type === "damage") return `Deal ${effect.amount}`;
+    if (effect.type === "buff") return "Buff";
+    if (effect.type === "returnToHand") return "Bounce";
     return this.type;
+  }
+
+  drawCenteredText(text, startY, lineHeight, maxLines = 2) {
+    const maxWidth = this.width - 20;
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    words.forEach((word) => {
+      const nextLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (ctx.measureText(nextLine).width <= maxWidth || !currentLine) {
+        currentLine = nextLine;
+        return;
+      }
+
+      lines.push(currentLine);
+      currentLine = word;
+    });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    lines.slice(0, maxLines).forEach((line, index) => {
+      ctx.fillText(line, this.x + this.width / 2, startY + index * lineHeight);
+    });
   }
 
   drawCardBack() {

@@ -246,6 +246,7 @@ function createDeckFromConfig(deckConfig) {
         cardConfig.health ?? 0,
         cardConfig.attack ?? 0,
         (cardConfig.effects || []).map((effect) => ({ ...effect })),
+        cardConfig.text || "",
       ),
     );
   });

@@ -263,6 +263,7 @@ class DeckBuildingScreen {
       cardConfig.health ?? 0,
       cardConfig.attack ?? 0,
       (cardConfig.effects || []).map((effect) => ({ ...effect })),
+      cardConfig.text || "",
     );
 
     card.hoverDuration = 0.12;
@@ -273,7 +274,7 @@ class DeckBuildingScreen {
     if (this.selectedDeck.length >= DECK_SIZE) return;
     if (!this.canAddCard(cardConfig)) return;
 
-    this.selectedDeck.push(createCardConfig(cardConfig));
+    this.selectedDeck.push(cardConfig);
     zzfx(...CARD_DRAW_SOUND);
   }
 
