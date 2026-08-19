@@ -14,12 +14,24 @@ class Player {
     this.name = name;
   }
 
+  resetBattleState() {
+    this.health = this.maxHealth;
+    this.maxMana = 1;
+    this.mana = 1;
+    this.hand = [];
+    this.board = [];
+  }
+
   setDeck(deck) {
     this.deck = deck;
   }
 
+  canDrawCard() {
+    return this.hand.length < HAND_LIMIT;
+  }
+
   drawCard() {
-    if (this.hand.length >= HAND_LIMIT) return null;
+    if (!this.canDrawCard()) return null;
 
     const card = this.deck.pop();
 
@@ -33,6 +45,17 @@ class Player {
     for (let i = 0; i < count; i += 1) {
       if (!this.drawCard()) break;
     }
+  }
+
+  canSummonMinion() {
+    return this.board.length < MAX_BOARD_SIZE;
+  }
+
+  summonMinion(card) {
+    if (!card || !this.canSummonMinion()) return false;
+
+    this.board.push(card);
+    return true;
   }
 
   takeDamage(amount) {

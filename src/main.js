@@ -6,6 +6,8 @@ game.startBattle();
 let previousTimeStamp = 0;
 
 function update(delta) {
+  game.update(delta);
+
   if (game.activeScreen) {
     game.activeScreen.update(delta);
   }
