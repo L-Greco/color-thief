@@ -5,14 +5,6 @@ game.startBattle();
 
 let previousTimeStamp = 0;
 
-function update(delta) {
-  game.update(delta);
-
-  if (game.activeScreen) {
-    game.activeScreen.update(delta);
-  }
-}
-
 function normalizeDelta(delta) {
   if (delta < 0) return 0;
   if (delta > MAX_DELTA) return MAX_DELTA;
@@ -27,11 +19,9 @@ function gameLoop(timestamp) {
   }
   previousTimeStamp = timestamp;
 
-  update(normalizeDelta(delta));
+  game.update(normalizeDelta(delta));
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (game.activeScreen) {
-    game.activeScreen.draw();
-  }
+  game.draw();
 
   requestAnimationFrame(gameLoop);
 }

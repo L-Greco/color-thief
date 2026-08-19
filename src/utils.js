@@ -9,6 +9,15 @@ pointCollision = (rect, point) => {
     point.y <= rect.y + rect.height
   );
 };
+rectFromZone = (zone) => {
+  return {
+    x: zone[0],
+    y: zone[1],
+    width: zone[2],
+    height: zone[3],
+  };
+};
+
 shuffle = (cards) => {
   for (let i = cards.length - 1; i > 0; i -= 1) {
     const j = floor(random() * (i + 1));

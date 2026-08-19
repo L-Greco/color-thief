@@ -17,8 +17,8 @@ canvas.addEventListener("pointerdown", (e) => {
   mousePosition.x = point.x;
   mousePosition.y = point.y;
 
-  if (game.activeScreen) {
-    game.activeScreen.handlePointerDown(point);
+  if (game.screen) {
+    game.screen.handlePointerDown(point);
   }
 });
 
@@ -27,8 +27,8 @@ canvas.addEventListener("mousemove", (e) => {
   mousePosition.x = e.clientX - rect.left;
   mousePosition.y = e.clientY - rect.top;
 
-  if (game.activeScreen) {
-    game.activeScreen.handlePointerMove(mousePosition);
+  if (game.screen) {
+    game.screen.handlePointerMove(mousePosition);
   }
 });
 
@@ -42,13 +42,13 @@ canvas.addEventListener("pointerup", (e) => {
   mousePosition.x = point.x;
   mousePosition.y = point.y;
 
-  if (game.activeScreen && game.activeScreen.handlePointerUp(point)) {
+  if (game.screen && game.screen.handlePointerUp(point)) {
     return;
   }
 });
 
 canvas.addEventListener("click", () => {
-  if (game.activeScreen && game.activeScreen.handleClick(mousePosition)) {
+  if (game.screen && game.screen.handleClick(mousePosition)) {
     return;
   }
 });
@@ -56,11 +56,11 @@ canvas.addEventListener("click", () => {
 document.addEventListener("keydown", (e) => {
   ensureAudioReady();
 
-  if (e.code === "KeyD") {
-    game.drawCardForPlayer();
+  if (e.code === "KeyD" && game.battle) {
+    game.battle.drawCardForPlayer();
   }
 
-  if (e.code === "KeyE") {
-    game.drawCardForEnemy();
+  if (e.code === "KeyE" && game.battle) {
+    game.battle.drawCardForEnemy();
   }
 });

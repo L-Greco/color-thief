@@ -1,6 +1,6 @@
 class BattleScreen {
-  constructor(game) {
-    this.game = game;
+  constructor(battle) {
+    this.battle = battle;
     this.enemyDeckRect = this.createDeckRect(BATTLE_LAYOUT.enemyBoard);
     this.playerDeckRect = this.createDeckRect(BATTLE_LAYOUT.playerHand);
     this.endTurnRect = this.createEndTurnRect(BATTLE_LAYOUT.playerBoard);
@@ -11,15 +11,15 @@ class BattleScreen {
 
   update(delta) {
     this.layoutHand(
-      this.game.player.hand,
+      this.battle.player.hand,
       BATTLE_LAYOUT.playerHand,
       this.playerDeckRect,
     );
-    this.layoutBoard(this.game.player.board, BATTLE_LAYOUT.playerBoard);
-    this.layoutBoard(this.game.enemy.board, BATTLE_LAYOUT.enemyBoard);
-    this.updateCards(this.game.player.hand, delta, true);
-    this.updateCards(this.game.player.board, delta, false);
-    this.updateCards(this.game.enemy.board, delta, false);
+    this.layoutBoard(this.battle.player.board, BATTLE_LAYOUT.playerBoard);
+    this.layoutBoard(this.battle.enemy.board, BATTLE_LAYOUT.enemyBoard);
+    this.updateCards(this.battle.player.hand, delta, true);
+    this.updateCards(this.battle.player.board, delta, false);
+    this.updateCards(this.battle.enemy.board, delta, false);
     this.updateCursor();
   }
 
@@ -104,24 +104,28 @@ class BattleScreen {
 
   draw() {
     this.drawBackground();
-    this.drawStatusRow(this.game.enemy, BATTLE_LAYOUT.enemyStatus, "Enemy");
-    this.drawStatusRow(this.game.player, BATTLE_LAYOUT.playerStatus, "Player");
-    this.drawDeckInfo(this.game.enemy, this.enemyDeckRect, "Click to draw");
-    this.drawDeckInfo(this.game.player, this.playerDeckRect, "Click to draw");
+    this.drawStatusRow(this.battle.enemy, BATTLE_LAYOUT.enemyStatus, "Enemy");
+    this.drawStatusRow(
+      this.battle.player,
+      BATTLE_LAYOUT.playerStatus,
+      "Player",
+    );
+    this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, "Click to draw");
+    this.drawDeckInfo(this.battle.player, this.playerDeckRect, "Click to draw");
     this.drawTurnPanel();
-    this.drawCards(this.game.enemy.board);
-    this.drawCards(this.game.player.board);
-    this.drawCards(this.game.player.hand);
+    this.drawCards(this.battle.enemy.board);
+    this.drawCards(this.battle.player.board);
+    this.drawCards(this.battle.player.hand);
     this.drawDebugHelp();
 
-    if (!this.game.enemy.board.length) {
+    if (!this.battle.enemy.board.length) {
       this.drawBoardHint(
         BATTLE_LAYOUT.enemyBoard,
         "Enemy minions will appear here",
       );
     }
 
-    if (!this.game.player.board.length) {
+    if (!this.battle.player.board.length) {
       this.drawBoardHint(
         BATTLE_LAYOUT.playerBoard,
         "Drag cards here to play them",
@@ -198,21 +202,21 @@ class BattleScreen {
     ctx.font = "18px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText(`Turn ${this.game.turn}`, 960, 30);
+    ctx.fillText(`Turn ${this.battle.turn}`, 960, 30);
     ctx.fillText(
-      this.game.isPlayerTurn() ? "Player turn" : "Enemy turn",
+      this.battle.isPlayerTurn() ? "Player turn" : "Enemy turn",
       960,
       90,
     );
     ctx.fillStyle = "#444";
-    ctx.fillText(this.game.statusMessage, 960, 122);
+    ctx.fillText(this.battle.statusMessage, 960, 122);
 
     this.drawEndTurnButton();
   }
 
   drawEndTurnButton() {
     const { x, y, width, height } = this.endTurnRect;
-    const enabled = this.game.isPlayerTurn();
+    const enabled = this.battle.isPlayerTurn();
     const hovered = pointCollision(this.endTurnRect, mousePosition);
     const pressed = enabled && this.endTurnPressed;
     const offsetY = pressed ? 4 : 0;
@@ -261,18 +265,13 @@ class BattleScreen {
   handleClick(point) {
     if (this.dragCard) return false;
 
-    if (pointCollision(this.endTurnRect, point)) {
-      this.game.endTurn();
-      return true;
-    }
-
     if (pointCollision(this.playerDeckRect, point)) {
-      this.game.drawCardForPlayer();
+      this.battle.drawCardForPlayer();
       return true;
     }
 
     if (pointCollision(this.enemyDeckRect, point)) {
-      this.game.drawCardForEnemy();
+      this.battle.drawCardForEnemy();
       return true;
     }
 
@@ -280,7 +279,7 @@ class BattleScreen {
   }
 
   handlePointerDown(point) {
-    if (pointCollision(this.endTurnRect, point)) {
+    if (this.battle.isPlayerTurn() && pointCollision(this.endTurnRect, point)) {
       this.endTurnPressed = true;
       canvas.style.cursor = "pointer";
       return true;
@@ -315,7 +314,7 @@ class BattleScreen {
       this.endTurnPressed = false;
 
       if (pointCollision(this.endTurnRect, point)) {
-        this.game.endTurn();
+        this.battle.endTurn();
         return true;
       }
     }
@@ -332,17 +331,17 @@ class BattleScreen {
     card.scale = 1;
 
     if (droppedOnPlayerBoard) {
-      this.game.playCardFromHand(this.game.player, this.game.enemy, card);
+      this.battle.playCardFromHand(this.battle.player, this.battle.enemy, card);
     } else {
-      this.game.setStatus("Drop cards on the player board");
+      this.battle.setStatus("Drop cards on the player board");
     }
 
     return true;
   }
 
   findHoveredHandCard(point = mousePosition) {
-    for (let i = this.game.player.hand.length - 1; i >= 0; i -= 1) {
-      const card = this.game.player.hand[i];
+    for (let i = this.battle.player.hand.length - 1; i >= 0; i -= 1) {
+      const card = this.battle.player.hand[i];
 
       if (
         pointCollision(
