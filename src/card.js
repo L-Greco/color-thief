@@ -13,8 +13,7 @@ class Card {
     cost = 0,
     health = 2,
     attack = 1,
-    effect = null,
-    amount = 0,
+    effects = [],
   ) {
     this.x = x;
     this.y = y;
@@ -25,8 +24,7 @@ class Card {
     this.cost = cost;
     this.health = health;
     this.attack = attack;
-    this.effect = effect;
-    this.amount = amount;
+    this.effects = effects;
   }
   setPosition(x, y) {
     this.x = x;
@@ -141,9 +139,14 @@ class Card {
   }
 
   effectLabel() {
-    if (this.effect === "draw") return `Draw ${this.amount}`;
-    if (this.effect === "heal") return `Heal ${this.amount}`;
-    if (this.effect === "damage") return `Deal ${this.amount}`;
+    const primaryEffect = this.effects[0];
+
+    if (!primaryEffect) return this.type;
+    if (primaryEffect.type === "draw") return `Draw ${primaryEffect.amount}`;
+    if (primaryEffect.type === "heal") return `Heal ${primaryEffect.amount}`;
+    if (primaryEffect.type === "damage") return `Deal ${primaryEffect.amount}`;
+    if (primaryEffect.type === "buff") return "Buff";
+    if (primaryEffect.type === "returnToHand") return "Bounce";
     return this.type;
   }
 

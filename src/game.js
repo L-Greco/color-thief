@@ -6,7 +6,7 @@ states = {
 };
 
 class Game {
-  state = states.battle;
+  state = states.deckBuilding;
   screen = null;
   battle = null;
 
@@ -23,9 +23,15 @@ class Game {
     this.screen = screen;
   }
 
-  startBattle() {
+  startDeckBuilding() {
+    this.state = states.deckBuilding;
+    this.battle = null;
+    this.setScreen(new DeckBuildingScreen(this));
+  }
+
+  startBattle(playerDeckConfig) {
     this.state = states.battle;
-    this.battle = new BattleState(this.player, this.enemy);
+    this.battle = new BattleState(this.player, this.enemy, playerDeckConfig);
     this.battle.start();
     this.setScreen(new BattleScreen(this.battle));
   }

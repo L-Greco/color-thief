@@ -4,16 +4,17 @@ class BattleState {
   statusMessage = "";
   lastStatusAt = 0;
 
-  constructor(player, enemy) {
+  constructor(player, enemy, playerDeckConfig) {
     this.player = player;
     this.enemy = enemy;
+    this.playerDeckConfig = playerDeckConfig;
   }
 
   start() {
     this.turn = 1;
     this.turnOwner = "player";
-    this.player.setDeck(createDeckFromConfig(starterDeckConfig));
-    this.enemy.setDeck(createDeckFromConfig(starterDeckConfig));
+    this.player.setDeck(createDeckFromConfig(this.playerDeckConfig));
+    this.enemy.setDeck(createDeckFromConfig(enemyStarterDeckConfig));
     shuffle(this.player.deck);
     shuffle(this.enemy.deck);
     this.player.resetBattleState();
@@ -103,7 +104,7 @@ class BattleState {
     player.hand.splice(cardIndex, 1);
 
     if (card.type === "spell") {
-      this.resolveSpell(card, player, opponent);
+      this.resolveCardEffects(card, null, player, opponent);
       zzfx(...CARD_DRAW_SOUND);
       this.setStatus(`Cast ${card.name}`);
       return true;
@@ -116,25 +117,92 @@ class BattleState {
       return false;
     }
 
+    this.resolveCardEffects(card, "onPlay", player, opponent);
     zzfx(...CARD_DRAW_SOUND);
     this.setStatus(`Played ${card.name}`);
     return true;
   }
 
-  resolveSpell(card, player, opponent) {
-    if (card.effect === "draw") {
-      player.drawCards(card.amount || 1);
+  resolveCardEffects(card, trigger, player, opponent) {
+    const effects = (card.effects || []).filter(
+      (effect) => !effect.trigger || effect.trigger === trigger,
+    );
+
+    effects.forEach((effect) => this.applyEffect(effect, player, opponent));
+  }
+
+  applyEffect(effect, player, opponent) {
+    if (effect.type === "draw") {
+      player.drawCards(effect.amount || 1);
       return;
     }
 
-    if (card.effect === "heal") {
-      player.heal(card.amount || 0);
+    if (effect.type === "heal") {
+      player.heal(effect.amount || 0);
       return;
     }
 
-    if (card.effect === "damage") {
-      opponent.takeDamage(card.amount || 0);
+    if (effect.type === "damage") {
+      this.applyDamageEffect(effect, player, opponent);
+      return;
     }
+
+    if (effect.type === "buff") {
+      const target = player.board[0];
+
+      if (!target) return;
+      target.attack += effect.attack || 0;
+      target.health += effect.health || 0;
+      return;
+    }
+
+    if (effect.type === "returnToHand") {
+      const target = opponent.board[0];
+
+      if (!target) return;
+
+      opponent.board.splice(0, 1);
+
+      if (opponent.canDrawCard()) {
+        opponent.hand.push(target);
+      }
+    }
+  }
+
+  applyDamageEffect(effect, player, opponent) {
+    const amount = effect.amount || 0;
+
+    if (effect.target === "enemyMinion") {
+      const target = opponent.board[0];
+
+      if (!target) return;
+      this.damageMinion(opponent, target, amount, player);
+      return;
+    }
+
+    if (effect.target === "allEnemyMinions") {
+      const targets = [...opponent.board];
+
+      targets.forEach((target) =>
+        this.damageMinion(opponent, target, amount, player),
+      );
+      return;
+    }
+
+    opponent.takeDamage(amount);
+  }
+
+  damageMinion(controller, minion, amount, opponent) {
+    minion.health -= amount;
+
+    if (minion.health > 0) return;
+
+    const minionIndex = controller.board.indexOf(minion);
+
+    if (minionIndex === -1) return;
+
+    controller.board.splice(minionIndex, 1);
+    this.resolveCardEffects(minion, "onDeath", controller, opponent);
   }
 
   endTurn() {
@@ -166,23 +234,20 @@ function createDeckFromConfig(deckConfig) {
   const deck = [];
 
   deckConfig.forEach((cardConfig) => {
-    for (let i = 0; i < cardConfig.copies; i += 1) {
-      deck.push(
-        new Card(
-          0,
-          0,
-          CARD_WIDTH,
-          CARD_HEIGHT,
-          cardConfig.name,
-          cardConfig.type || "minion",
-          cardConfig.cost || 0,
-          cardConfig.health ?? 0,
-          cardConfig.attack ?? 0,
-          cardConfig.effect || null,
-          cardConfig.amount || 0,
-        ),
-      );
-    }
+    deck.push(
+      new Card(
+        0,
+        0,
+        CARD_WIDTH,
+        CARD_HEIGHT,
+        cardConfig.name,
+        cardConfig.type || "minion",
+        cardConfig.cost || 0,
+        cardConfig.health ?? 0,
+        cardConfig.attack ?? 0,
+        (cardConfig.effects || []).map((effect) => ({ ...effect })),
+      ),
+    );
   });
 
   return deck;

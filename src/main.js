@@ -1,7 +1,7 @@
 const player = new Player("Player");
 const enemy = new Player("Enemy");
 const game = new Game(player, enemy);
-game.startBattle();
+game.startDeckBuilding();
 
 let previousTimeStamp = 0;
 
