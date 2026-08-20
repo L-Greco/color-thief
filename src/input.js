@@ -8,11 +8,7 @@ canvas.addEventListener("pointerdown", () => {
 });
 
 canvas.addEventListener("pointerdown", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const point = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top,
-  };
+  const point = getCanvasPoint(e.clientX, e.clientY);
 
   mousePosition.x = point.x;
   mousePosition.y = point.y;
@@ -23,9 +19,9 @@ canvas.addEventListener("pointerdown", (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  mousePosition.x = e.clientX - rect.left;
-  mousePosition.y = e.clientY - rect.top;
+  const point = getCanvasPoint(e.clientX, e.clientY);
+  mousePosition.x = point.x;
+  mousePosition.y = point.y;
 
   if (game.screen) {
     game.screen.handlePointerMove(mousePosition);
@@ -33,11 +29,7 @@ canvas.addEventListener("mousemove", (e) => {
 });
 
 canvas.addEventListener("pointerup", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const point = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top,
-  };
+  const point = getCanvasPoint(e.clientX, e.clientY);
 
   mousePosition.x = point.x;
   mousePosition.y = point.y;
