@@ -3,14 +3,17 @@ class BattleState {
   turnOwner = "player";
   statusMessage = "";
   lastStatusAt = 0;
+  ended = false;
 
-  constructor(player, enemy, playerDeckConfig) {
+  constructor(game, player, enemy, playerDeckConfig) {
+    this.game = game;
     this.player = player;
     this.enemy = enemy;
     this.playerDeckConfig = playerDeckConfig;
   }
 
   start() {
+    this.ended = false;
     this.turn = 1;
     this.turnOwner = "player";
     this.player.setDeck(createDeckFromConfig(this.playerDeckConfig));
@@ -34,6 +37,8 @@ class BattleState {
   }
 
   update() {
+    if (this.ended) return;
+
     if (
       this.statusMessage &&
       performance.now() - this.lastStatusAt > 1800 &&
@@ -45,6 +50,7 @@ class BattleState {
   }
 
   drawCardForPlayer() {
+    if (this.ended) return;
     if (!this.isPlayerTurn()) {
       this.setStatus("You can only draw on your turn");
       return;
@@ -63,18 +69,13 @@ class BattleState {
   }
 
   drawCardForEnemy() {
+    if (this.ended) return;
     const card = this.enemy.drawCard();
-
-    if (card) {
-      zzfx(...CARD_DRAW_SOUND);
-    }
   }
 
-  canPlayCard(player, card) {
+  canUseCard(player, opponent, card) {
+    if (this.ended) return { ok: false, reason: "Battle is over" };
     if (!card) return { ok: false, reason: "No card selected" };
-    if (player !== this.player || !this.isPlayerTurn()) {
-      return { ok: false, reason: "You can only play on your turn" };
-    }
     if (card.cost > player.mana) {
       return { ok: false, reason: "Not enough mana" };
     }
@@ -85,7 +86,22 @@ class BattleState {
     return { ok: true, reason: "" };
   }
 
-  playCardFromHand(player, opponent, card) {
+  canPlayCard(player, card) {
+    if (player !== this.player || !this.isPlayerTurn()) {
+      return { ok: false, reason: "You can only play on your turn" };
+    }
+
+    return this.canUseCard(player, this.enemy, card);
+  }
+
+  canEnemyPlayCard(player, opponent, card) {
+    const playCheck = this.canUseCard(player, opponent, card);
+
+    if (!playCheck.ok) return false;
+    return this.hasPlayableCardTargets(card, player, opponent);
+  }
+
+  playCardFromHand(player, opponent, card, target = null) {
     const playCheck = this.canPlayCard(player, card);
 
     if (!playCheck.ok) {
@@ -93,19 +109,42 @@ class BattleState {
       return false;
     }
 
+    return this.performCardPlay(player, opponent, card, target);
+  }
+
+  playEnemyCard(player, opponent, card, target = null) {
+    const playCheck = this.canUseCard(player, opponent, card);
+
+    if (!playCheck.ok) return false;
+    return this.performCardPlay(player, opponent, card, target);
+  }
+
+  performCardPlay(player, opponent, card, target = null) {
+    if (this.ended) return false;
+    const targetCheck = this.validateCardTarget(card, player, opponent, target);
+
+    if (!targetCheck.ok) {
+      if (player === this.player) {
+        this.setStatus(targetCheck.reason);
+      }
+      return false;
+    }
+
     const cardIndex = player.hand.indexOf(card);
 
     if (cardIndex === -1) return false;
     if (!player.spendMana(card.cost)) {
-      this.setStatus("Not enough mana");
       return false;
     }
 
     player.hand.splice(cardIndex, 1);
 
     if (card.type === "spell") {
-      this.resolveCardEffects(card, null, player, opponent);
-      zzfx(...CARD_DRAW_SOUND);
+      if (this.cardHasDamageEffect(card)) {
+        zzfx(...SPELL_DAMAGE_SOUND);
+      }
+      this.resolveCardEffects(card, null, player, opponent, target);
+      if (this.checkGameOver()) return true;
       this.setStatus(`Cast ${card.name}`);
       return true;
     }
@@ -117,42 +156,42 @@ class BattleState {
       return false;
     }
 
-    this.resolveCardEffects(card, "onPlay", player, opponent);
+    card.summon();
+    this.resolveCardEffects(card, "onPlay", player, opponent, target);
+    if (this.checkGameOver()) return true;
     zzfx(...CARD_DRAW_SOUND);
     this.setStatus(`Played ${card.name}`);
     return true;
   }
 
-  resolveCardEffects(card, trigger, player, opponent) {
+  resolveCardEffects(card, trigger, player, opponent, target = null) {
     const effects = (card.effects || []).filter(
       (effect) => !effect.trigger || effect.trigger === trigger,
     );
 
-    effects.forEach((effect) => this.applyEffect(effect, player, opponent));
+    effects.forEach((effect) =>
+      this.applyEffect(effect, player, opponent, target),
+    );
   }
 
-  applyEffect(effect, player, opponent) {
+  applyEffect(effect, player, opponent, target) {
     if (effect.type === "draw") {
       player.drawCards(effect.amount || 1);
       return;
     }
 
     if (effect.type === "heal") {
-      player.heal(effect.amount || 0);
+      this.applyHealEffect(effect, player, target);
       return;
     }
 
     if (effect.type === "damage") {
-      this.applyDamageEffect(effect, player, opponent);
+      this.applyDamageEffect(effect, player, opponent, target);
       return;
     }
 
     if (effect.type === "buff") {
-      const target = player.board[0];
-
-      if (!target) return;
-      target.attack += effect.attack || 0;
-      target.health += effect.health || 0;
+      this.applyBuffEffect(effect, player, target);
       return;
     }
 
@@ -169,13 +208,43 @@ class BattleState {
     }
   }
 
-  applyDamageEffect(effect, player, opponent) {
+  applyHealEffect(effect, player, target) {
+    if (effect.target === "friendlyMinion") {
+      if (!target || !player.board.includes(target)) return;
+      target.health += effect.amount || 0;
+      return;
+    }
+
+    player.heal(effect.amount || 0);
+  }
+
+  applyBuffEffect(effect, player, target) {
+    if (effect.target === "allFriendlyMinions") {
+      if (player.board.length) {
+        zzfx(...BUFF_SOUND);
+      }
+      player.board.forEach((minion) => {
+        minion.attack += effect.attack || 0;
+        minion.health += effect.health || 0;
+      });
+      return;
+    }
+
+    const targetMinion =
+      effect.target === "friendlyMinion" ? target : player.board[0];
+
+    if (!targetMinion || !player.board.includes(targetMinion)) return;
+    zzfx(...BUFF_SOUND);
+    targetMinion.attack += effect.attack || 0;
+    targetMinion.health += effect.health || 0;
+  }
+
+  applyDamageEffect(effect, player, opponent, target) {
     const amount = effect.amount || 0;
 
     if (effect.target === "enemyMinion") {
-      const target = opponent.board[0];
+      if (!target || !opponent.board.includes(target)) return;
 
-      if (!target) return;
       this.damageMinion(opponent, target, amount, player);
       return;
     }
@@ -197,6 +266,10 @@ class BattleState {
 
     if (minion.health > 0) return;
 
+    this.destroyMinion(controller, minion, opponent);
+  }
+
+  destroyMinion(controller, minion, opponent) {
     const minionIndex = controller.board.indexOf(minion);
 
     if (minionIndex === -1) return;
@@ -205,28 +278,200 @@ class BattleState {
     this.resolveCardEffects(minion, "onDeath", controller, opponent);
   }
 
+  validateCardTarget(card, player, opponent, target) {
+    const targetType = this.getRequiredTargetType(card);
+
+    if (!targetType) return { ok: true, reason: "" };
+    if (!target) {
+      return {
+        ok: false,
+        reason:
+          targetType === "friendlyMinion"
+            ? "Choose a friendly minion"
+            : "Choose an enemy minion",
+      };
+    }
+
+    if (targetType === "enemyMinion" && !opponent.board.includes(target)) {
+      return { ok: false, reason: "Choose an enemy minion" };
+    }
+
+    if (targetType === "friendlyMinion" && !player.board.includes(target)) {
+      return { ok: false, reason: "Choose a friendly minion" };
+    }
+
+    return { ok: true, reason: "" };
+  }
+
+  getRequiredTargetType(card) {
+    const effects = card.effects || [];
+
+    for (let i = 0; i < effects.length; i += 1) {
+      const target = effects[i].target;
+
+      if (target === "enemyMinion" || target === "friendlyMinion") {
+        return target;
+      }
+    }
+
+    return null;
+  }
+
+  cardHasDamageEffect(card) {
+    return (card.effects || []).some((effect) => effect.type === "damage");
+  }
+
+  attackMinion(attackerController, attacker, defenderController, defender) {
+    const attackCheck = this.canMinionAttack(attackerController, attacker);
+
+    if (!attackCheck.ok) {
+      this.setStatus(attackCheck.reason);
+      return false;
+    }
+    if (!defender || !defenderController.board.includes(defender)) {
+      this.setStatus("Choose an enemy minion");
+      return false;
+    }
+
+    const attackerDamage = attacker.attack || 0;
+    const defenderDamage = defender.attack || 0;
+
+    zzfx(...MINION_ATTACK_SOUND);
+    attacker.exhaust();
+    defender.health -= attackerDamage;
+    attacker.health -= defenderDamage;
+
+    if (defender.health <= 0) {
+      this.destroyMinion(defenderController, defender, attackerController);
+    }
+
+    if (attacker.health <= 0) {
+      this.destroyMinion(attackerController, attacker, defenderController);
+    }
+
+    if (this.checkGameOver()) return true;
+    this.setStatus(`${attacker.name} attacked ${defender.name}`);
+    return true;
+  }
+
+  attackHero(attackerController, attacker, defender) {
+    const attackCheck = this.canMinionAttack(attackerController, attacker);
+
+    if (!attackCheck.ok) {
+      this.setStatus(attackCheck.reason);
+      return false;
+    }
+
+    zzfx(...MINION_ATTACK_SOUND);
+    attacker.exhaust();
+    defender.takeDamage(attacker.attack || 0);
+    if (this.checkGameOver()) return true;
+    this.setStatus(`${attacker.name} attacked ${defender.name}`);
+    return true;
+  }
+
+  hasPlayableCardTargets(card, player, opponent) {
+    const effects = card.effects || [];
+
+    if (!effects.length) return true;
+
+    return effects.every((effect) =>
+      this.effectHasPlayableTarget(effect, player, opponent),
+    );
+  }
+
+  effectHasPlayableTarget(effect, player, opponent) {
+    if (!effect.target) return true;
+    if (effect.target === "enemyMinion") return opponent.board.length > 0;
+    if (effect.target === "allEnemyMinions") return opponent.board.length > 0;
+    if (effect.target === "friendlyMinion") return player.board.length > 0;
+    if (effect.target === "allFriendlyMinions") return player.board.length > 0;
+    return true;
+  }
+
   endTurn() {
+    if (this.ended) return;
     if (!this.isPlayerTurn()) return;
 
     this.turnOwner = "enemy";
     this.setStatus("Enemy turn");
     this.runEnemyTurn();
+    if (this.ended) return;
     this.beginPlayerTurn();
   }
 
   runEnemyTurn() {
-    this.enemy.maxMana = min(10, this.enemy.maxMana + 1);
-    this.enemy.refillMana();
-    this.enemy.drawCard();
+    if (this.ended) return;
+    this.readyBoardForTurn(this.enemy);
+    this.enemy.takeTurn(this, this.player);
   }
 
   beginPlayerTurn() {
+    if (this.ended) return;
     this.turn += 1;
     this.turnOwner = "player";
     this.player.maxMana = min(10, this.player.maxMana + 1);
     this.player.refillMana();
+    this.readyBoardForTurn(this.player);
     this.player.drawCard();
     this.setStatus("Player turn");
+  }
+
+  readyBoardForTurn(player) {
+    player.board.forEach((minion) => minion.readyForTurn());
+  }
+
+  isCurrentTurnController(player) {
+    return (
+      (player === this.player && this.turnOwner === "player") ||
+      (player === this.enemy && this.turnOwner === "enemy")
+    );
+  }
+
+  canMinionAttack(player, minion) {
+    if (this.ended) {
+      return { ok: false, reason: "Battle is over" };
+    }
+    if (!minion || minion.type !== "minion") {
+      return { ok: false, reason: "Only minions can attack" };
+    }
+    if (!player.board.includes(minion)) {
+      return { ok: false, reason: "Minion is not on the board" };
+    }
+    if (!this.isCurrentTurnController(player)) {
+      return { ok: false, reason: "You can only attack on your turn" };
+    }
+    if (!minion.canAttack) {
+      return { ok: false, reason: "This minion can't attack yet" };
+    }
+
+    return { ok: true, reason: "" };
+  }
+
+  checkGameOver() {
+    if (this.ended) return true;
+
+    if (this.enemy.health <= 0) {
+      this.finishBattle("victory");
+      return true;
+    }
+
+    if (this.player.health <= 0) {
+      this.finishBattle("defeat");
+      return true;
+    }
+
+    return false;
+  }
+
+  finishBattle(outcome) {
+    if (this.ended) return;
+
+    this.ended = true;
+    if (outcome === "defeat") {
+      zzfx(...DEFEAT_SOUND);
+    }
+    this.game.showGameOver(outcome);
   }
 }
 

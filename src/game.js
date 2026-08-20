@@ -31,9 +31,15 @@ class Game {
 
   startBattle(playerDeckConfig) {
     this.state = states.battle;
-    this.battle = new BattleState(this.player, this.enemy, playerDeckConfig);
+    this.battle = new BattleState(this, this.player, this.enemy, playerDeckConfig);
     this.battle.start();
     this.setScreen(new BattleScreen(this.battle));
+  }
+
+  showGameOver(outcome) {
+    this.state = states.gameOver;
+    this.battle = null;
+    this.setScreen(new GameOverScreen(this, outcome));
   }
 
   update(delta) {

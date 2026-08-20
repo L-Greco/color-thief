@@ -7,6 +7,8 @@ class BattleScreen {
     this.endTurnPressed = false;
     this.dragCard = null;
     this.dragOffset = { x: 0, y: 0 };
+    this.selectedAction = null;
+    this.suppressClick = false;
   }
 
   update(delta) {
@@ -17,8 +19,12 @@ class BattleScreen {
     );
     this.layoutBoard(this.battle.player.board, BATTLE_LAYOUT.playerBoard);
     this.layoutBoard(this.battle.enemy.board, BATTLE_LAYOUT.enemyBoard);
-    this.updateCards(this.battle.player.hand, delta, true);
-    this.updateCards(this.battle.player.board, delta, false);
+    this.updateCards(this.battle.player.hand, delta, (card) =>
+      this.canInteractWithHandCard(card),
+    );
+    this.updateCards(this.battle.player.board, delta, (card) =>
+      this.canStartAttackSelection(card),
+    );
     this.updateCards(this.battle.enemy.board, delta, false);
     this.updateCursor();
   }
@@ -87,15 +93,8 @@ class BattleScreen {
 
       const isMouseOver =
         interactive &&
-        pointCollision(
-          {
-            x: card.x,
-            y: card.y,
-            width: card.width,
-            height: card.height,
-          },
-          mousePosition,
-        );
+        (interactive === true || interactive(card)) &&
+        this.isPointOnCard(mousePosition, card);
 
       card.setHover(isMouseOver);
       card.update(deltaSeconds);
@@ -116,6 +115,7 @@ class BattleScreen {
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
     this.drawCards(this.battle.player.hand);
+    this.drawTargetMode();
     this.drawDebugHelp();
 
     if (!this.battle.enemy.board.length) {
@@ -128,7 +128,7 @@ class BattleScreen {
     if (!this.battle.player.board.length) {
       this.drawBoardHint(
         BATTLE_LAYOUT.playerBoard,
-        "Drag cards here to play them",
+        "Drag simple cards here to play them",
       );
     }
 
@@ -194,7 +194,60 @@ class BattleScreen {
   }
 
   drawCards(cards) {
-    cards.forEach((card) => card.draw());
+    cards.forEach((card) => ctx.wrap(() => card.draw()));
+  }
+
+  drawTargetMode() {
+    if (!this.selectedAction) return;
+
+    ctx.wrap(() => this.drawActionSource());
+    this.getActionTargets().forEach((target) =>
+      ctx.wrap(() => this.drawTargetMarker(target)),
+    );
+  }
+
+  drawActionSource() {
+    const card = this.selectedAction.card;
+
+    ctx.strokeStyle = "#2e9d44";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(card.x - 4, card.y - 4, card.width + 8, card.height + 8, 18);
+    ctx.stroke();
+  }
+
+  drawTargetMarker(target) {
+    const rect = this.getTargetRect(target);
+    const centerX = rect.x + rect.width / 2;
+    const centerY = rect.y + rect.height / 2;
+
+    ctx.strokeStyle = "#1f1f1f";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 28, 0, PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 18, 0, PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(centerX - 36, centerY);
+    ctx.lineTo(centerX + 36, centerY);
+    ctx.moveTo(centerX, centerY - 36);
+    ctx.lineTo(centerX, centerY + 36);
+    ctx.stroke();
+  }
+
+  getTargetRect(target) {
+    if (target.kind === "hero") {
+      return target.rect;
+    }
+
+    return {
+      x: target.x,
+      y: target.y,
+      width: target.width,
+      height: target.height,
+    };
   }
 
   drawTurnPanel() {
@@ -209,9 +262,23 @@ class BattleScreen {
       90,
     );
     ctx.fillStyle = "#444";
-    ctx.fillText(this.battle.statusMessage, 960, 122);
+    ctx.fillText(this.getTurnMessage(), 960, 122);
 
     this.drawEndTurnButton();
+  }
+
+  getTurnMessage() {
+    if (!this.selectedAction) {
+      return this.battle.statusMessage;
+    }
+
+    if (this.selectedAction.type === "attack") {
+      return "Choose an enemy minion or the enemy hero";
+    }
+
+    return this.selectedAction.targetType === "friendlyMinion"
+      ? "Choose a friendly minion"
+      : "Choose an enemy minion";
   }
 
   drawEndTurnButton() {
@@ -221,25 +288,25 @@ class BattleScreen {
     const pressed = enabled && this.endTurnPressed;
     const offsetY = pressed ? 4 : 0;
 
-    ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
-    ctx.shadowBlur = hovered ? 18 : 12;
-    ctx.shadowOffsetY = pressed ? 2 : 6;
+    ctx.wrap(() => {
+      ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+      ctx.shadowBlur = hovered ? 18 : 12;
+      ctx.shadowOffsetY = pressed ? 2 : 6;
 
-    const fillGradient = ctx.createLinearGradient(x, y, x, y + height);
-    fillGradient.addColorStop(0, enabled ? "#7ae06f" : "#bbbbbb");
-    fillGradient.addColorStop(1, enabled ? "#2e9d44" : "#919191");
-    ctx.fillStyle = fillGradient;
-    ctx.beginPath();
-    ctx.roundRect(x, y + offsetY, width, height, 32);
-    ctx.fill();
+      const fillGradient = ctx.createLinearGradient(x, y, x, y + height);
+      fillGradient.addColorStop(0, enabled ? "#7ae06f" : "#bbbbbb");
+      fillGradient.addColorStop(1, enabled ? "#2e9d44" : "#919191");
+      ctx.fillStyle = fillGradient;
+      ctx.beginPath();
+      ctx.roundRect(x, y + offsetY, width, height, 32);
+      ctx.fill();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 18px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("End Turn", x + width / 2, y + height / 2 + 1 + offsetY);
-    ctx.restore();
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 18px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("End Turn", x + width / 2, y + height / 2 + 1 + offsetY);
+    });
   }
 
   drawBoardHint(zone, label) {
@@ -256,14 +323,23 @@ class BattleScreen {
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText(
-      `Drag minions/spells to the player board. Hand: ${HAND_LIMIT}, Board: ${MAX_BOARD_SIZE}`,
+      "Drag simple cards to the board. Click targeted cards or ready minions to choose a target.",
       30,
       410,
     );
   }
 
   handleClick(point) {
+    if (this.suppressClick) {
+      this.suppressClick = false;
+      return true;
+    }
+
     if (this.dragCard) return false;
+
+    if (this.selectedAction) {
+      return this.handleTargetModeClick(point);
+    }
 
     if (pointCollision(this.playerDeckRect, point)) {
       this.battle.drawCardForPlayer();
@@ -275,7 +351,69 @@ class BattleScreen {
       return true;
     }
 
+    const boardMinion = this.findHoveredPlayerBoardMinion(point);
+
+    if (boardMinion && this.canStartAttackSelection(boardMinion)) {
+      this.selectedAction = {
+        type: "attack",
+        card: boardMinion,
+        targetType: "enemyMinion",
+      };
+      return true;
+    }
+
+    const handCard = this.findHoveredHandCard(point);
+
+    if (handCard && this.canStartCardTargetSelection(handCard)) {
+      this.selectedAction = {
+        type: "card",
+        card: handCard,
+        targetType: this.battle.getRequiredTargetType(handCard),
+      };
+      return true;
+    }
+
     return false;
+  }
+
+  handleTargetModeClick(point) {
+    const action = this.selectedAction;
+
+    if (!action) return false;
+    if (this.isPointOnCard(point, action.card)) {
+      this.selectedAction = null;
+      return true;
+    }
+
+    const target = this.findActionTarget(point);
+
+    this.selectedAction = null;
+
+    if (!target) {
+      return true;
+    }
+
+    if (action.type === "attack") {
+      if (target.kind === "hero") {
+        this.battle.attackHero(this.battle.player, action.card, this.battle.enemy);
+      } else {
+        this.battle.attackMinion(
+          this.battle.player,
+          action.card,
+          this.battle.enemy,
+          target,
+        );
+      }
+      return true;
+    }
+
+    this.battle.playCardFromHand(
+      this.battle.player,
+      this.battle.enemy,
+      action.card,
+      target,
+    );
+    return true;
   }
 
   handlePointerDown(point) {
@@ -285,9 +423,12 @@ class BattleScreen {
       return true;
     }
 
+    if (this.selectedAction) return false;
+
     const card = this.findHoveredHandCard(point);
 
-    if (!card) return false;
+    if (!card || !this.canDragHandCard(card)) return false;
+    if (this.battle.getRequiredTargetType(card)) return false;
 
     this.dragCard = card;
     this.dragOffset.x = point.x - card.x;
@@ -314,6 +455,7 @@ class BattleScreen {
       this.endTurnPressed = false;
 
       if (pointCollision(this.endTurnRect, point)) {
+        this.selectedAction = null;
         this.battle.endTurn();
         return true;
       }
@@ -329,6 +471,7 @@ class BattleScreen {
 
     this.dragCard = null;
     card.scale = 1;
+    this.suppressClick = true;
 
     if (droppedOnPlayerBoard) {
       this.battle.playCardFromHand(this.battle.player, this.battle.enemy, card);
@@ -343,22 +486,100 @@ class BattleScreen {
     for (let i = this.battle.player.hand.length - 1; i >= 0; i -= 1) {
       const card = this.battle.player.hand[i];
 
-      if (
-        pointCollision(
-          {
-            x: card.x,
-            y: card.y,
-            width: card.width,
-            height: card.height,
-          },
-          point,
-        )
-      ) {
+      if (this.isPointOnCard(point, card)) {
         return card;
       }
     }
 
     return null;
+  }
+
+  findHoveredPlayerBoardMinion(point = mousePosition, ignoredCard = null) {
+    return this.findHoveredBoardCard(this.battle.player.board, point, ignoredCard);
+  }
+
+  findHoveredEnemyBoardMinion(point = mousePosition) {
+    return this.findHoveredBoardCard(this.battle.enemy.board, point);
+  }
+
+  findHoveredBoardCard(cards, point, ignoredCard = null) {
+    for (let i = cards.length - 1; i >= 0; i -= 1) {
+      const card = cards[i];
+
+      if (card === ignoredCard) continue;
+      if (this.isPointOnCard(point, card)) {
+        return card;
+      }
+    }
+
+    return null;
+  }
+
+  canDragHandCard(card) {
+    return !!card && this.battle.isPlayerTurn();
+  }
+
+  canStartCardTargetSelection(card) {
+    if (!this.canDragHandCard(card)) return false;
+    return !!this.battle.getRequiredTargetType(card);
+  }
+
+  canStartAttackSelection(card) {
+    if (!card) return false;
+    return this.battle.canMinionAttack(this.battle.player, card).ok;
+  }
+
+  canInteractWithHandCard(card) {
+    return this.canDragHandCard(card) || this.canStartCardTargetSelection(card);
+  }
+
+  getActionTargets() {
+    if (!this.selectedAction) return [];
+    if (this.selectedAction.targetType === "friendlyMinion") {
+      return this.battle.player.board;
+    }
+
+    if (this.selectedAction.type === "attack") {
+      return [
+        ...this.battle.enemy.board,
+        {
+          kind: "hero",
+          rect: rectFromZone(BATTLE_LAYOUT.enemyStatus),
+        },
+      ];
+    }
+
+    return this.battle.enemy.board;
+  }
+
+  findActionTarget(point) {
+    const targets = this.getActionTargets();
+
+    for (let i = targets.length - 1; i >= 0; i -= 1) {
+      const target = targets[i];
+
+      if (this.isPointOnTarget(point, target)) {
+        return target;
+      }
+    }
+
+    return null;
+  }
+
+  isPointOnCard(point, card) {
+    return pointCollision(
+      {
+        x: card.x,
+        y: card.y,
+        width: card.width,
+        height: card.height,
+      },
+      point,
+    );
+  }
+
+  isPointOnTarget(point, target) {
+    return pointCollision(this.getTargetRect(target), point);
   }
 
   updateCursor() {
@@ -367,11 +588,29 @@ class BattleScreen {
       return;
     }
 
+    if (this.selectedAction) {
+      canvas.style.cursor = this.findActionTarget(mousePosition)
+        ? "pointer"
+        : "default";
+      return;
+    }
+
     if (pointCollision(this.endTurnRect, mousePosition)) {
       canvas.style.cursor = "pointer";
       return;
     }
 
-    canvas.style.cursor = this.findHoveredHandCard() ? "grab" : "default";
+    const hoveredHandCard = this.findHoveredHandCard();
+    const hoveredBoardMinion = this.findHoveredPlayerBoardMinion();
+
+    if (
+      (hoveredHandCard && this.canInteractWithHandCard(hoveredHandCard)) ||
+      (hoveredBoardMinion && this.canStartAttackSelection(hoveredBoardMinion))
+    ) {
+      canvas.style.cursor = "pointer";
+      return;
+    }
+
+    canvas.style.cursor = "default";
   }
 }

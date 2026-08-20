@@ -1,5 +1,5 @@
-const player = new Player("Player");
-const enemy = new Player("Enemy");
+const player = new Player();
+const enemy = new Enemy();
 const game = new Game(player, enemy);
 game.startDeckBuilding();
 

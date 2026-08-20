@@ -90,14 +90,14 @@ unicornCards = [
     attack: 7,
     health: 8,
     unique: true,
-    text: "On Play: Give all friendly minions +1/+1.",
+    text: "On Play: Give all friendly minions +2/+2.",
     effects: [
       {
         trigger: "onPlay",
         type: "buff",
         target: "allFriendlyMinions",
-        attack: 1,
-        health: 1,
+        attack: 2,
+        health: 2,
       },
     ],
   },
@@ -119,13 +119,13 @@ unicornCards = [
     name: "Golden Mane",
     type: "spell",
     cost: 2,
-    text: "Give a friendly minion +1/+2.",
+    text: "Give a friendly minion +1/+3.",
     effects: [
       {
         type: "buff",
         target: "friendlyMinion",
         attack: 1,
-        health: 2,
+        health: 3,
       },
     ],
   },
@@ -160,13 +160,13 @@ unicornCards = [
     name: "Charge of the Herd",
     type: "spell",
     cost: 4,
-    text: "Give all friendly minions +1/+1.",
+    text: "Give all friendly minions +2/+2.",
     effects: [
       {
         type: "buff",
         target: "allFriendlyMinions",
-        attack: 1,
-        health: 1,
+        attack: 2,
+        health: 2,
       },
     ],
   },
@@ -368,12 +368,12 @@ rainbowCards = [
     type: "spell",
     cost: 7,
     unique: true,
-    text: "Deal 3 damage to all enemy minions. Draw 2 cards.",
+    text: "Deal 4 damage to all enemy minions. Draw 2 cards.",
     effects: [
       {
         type: "damage",
         target: "allEnemyMinions",
-        amount: 3,
+        amount: 4,
       },
       {
         type: "draw",

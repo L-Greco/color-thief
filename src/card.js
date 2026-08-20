@@ -27,6 +27,8 @@ class Card {
     this.attack = attack;
     this.effects = effects;
     this.text = text;
+    this.canAttack = false;
+    this.hasAttacked = false;
   }
   setPosition(x, y) {
     this.x = x;
@@ -34,6 +36,20 @@ class Card {
   }
   setHover(bool) {
     this.hovered = bool;
+  }
+  summon() {
+    this.canAttack = false;
+    this.hasAttacked = false;
+  }
+  readyForTurn() {
+    if (this.type !== "minion") return;
+    this.canAttack = true;
+    this.hasAttacked = false;
+  }
+  exhaust() {
+    if (this.type !== "minion") return;
+    this.canAttack = false;
+    this.hasAttacked = true;
   }
   update(delta) {
     const progressDir = this.hovered ? 1 : -1;
@@ -49,8 +65,6 @@ class Card {
     this.scale = lerp(1, 1.2, easedProgress);
   }
   draw() {
-    ctx.save();
-
     const centerX = this.x + this.width / 2;
     const centerY = this.y + this.height / 2;
 
@@ -60,7 +74,6 @@ class Card {
 
     if (this.faceDown) {
       this.drawCardBack();
-      ctx.restore();
       return;
     }
 
@@ -132,8 +145,6 @@ class Card {
       ctx.font = "9px Arial";
       this.drawCenteredText(this.effectLabel(), this.y + this.height / 2 + 2, 10, 4);
     }
-
-    ctx.restore();
   }
 
   effectLabel() {

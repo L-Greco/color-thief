@@ -76,15 +76,15 @@ class DeckBuildingScreen {
       const selected = this.selectedSource.key === source.key;
       const hovered = pointCollision(rect, mousePosition);
 
-      ctx.save();
-      ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
-      ctx.shadowBlur = hovered ? 18 : 10;
-      ctx.shadowOffsetY = 5;
-      ctx.fillStyle = source.accent;
-      ctx.beginPath();
-      ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 24);
-      ctx.fill();
-      ctx.restore();
+      ctx.wrap(() => {
+        ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
+        ctx.shadowBlur = hovered ? 18 : 10;
+        ctx.shadowOffsetY = 5;
+        ctx.fillStyle = source.accent;
+        ctx.beginPath();
+        ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 24);
+        ctx.fill();
+      });
 
       if (selected) {
         ctx.strokeStyle = "#1f1f1f";
@@ -135,7 +135,7 @@ class DeckBuildingScreen {
 
       card.setHover(hovered);
       card.update(1 / 60);
-      card.draw();
+      ctx.wrap(() => card.draw());
     });
   }
 
@@ -224,21 +224,21 @@ class DeckBuildingScreen {
       gradient.addColorStop(1, "#8f8f8f");
     }
 
-    ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-    ctx.shadowBlur = hovered ? 16 : 10;
-    ctx.shadowOffsetY = 5;
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.roundRect(
-      this.startBattleRect.x,
-      this.startBattleRect.y,
-      this.startBattleRect.width,
-      this.startBattleRect.height,
-      24,
-    );
-    ctx.fill();
-    ctx.restore();
+    ctx.wrap(() => {
+      ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+      ctx.shadowBlur = hovered ? 16 : 10;
+      ctx.shadowOffsetY = 5;
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.roundRect(
+        this.startBattleRect.x,
+        this.startBattleRect.y,
+        this.startBattleRect.width,
+        this.startBattleRect.height,
+        24,
+      );
+      ctx.fill();
+    });
 
     ctx.fillStyle = "#fff";
     ctx.font = "bold 22px Arial";

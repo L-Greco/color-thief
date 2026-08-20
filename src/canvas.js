@@ -1,5 +1,10 @@
 canvas = document.getElementById("game");
 ctx = canvas.getContext("2d");
+ctx.wrap = (callback) => {
+  ctx.save();
+  callback();
+  ctx.restore();
+};
 
 drawZoneBorder = (zone, label, textY) => {
   ctx.strokeStyle = "black";
