@@ -62,7 +62,6 @@ class BattleScreen {
     cards.forEach((card, index) => {
       if (card === this.dragCard) return;
       card.setPosition(startX + spacing * index, y);
-      card.faceDown = false;
     });
   }
 
@@ -79,7 +78,6 @@ class BattleScreen {
 
     cards.forEach((card, index) => {
       card.setPosition(startX + spacing * index, y);
-      card.faceDown = false;
       card.setHover(false);
       card.scale = 1;
     });
@@ -112,6 +110,7 @@ class BattleScreen {
     this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, "Click to draw");
     this.drawDeckInfo(this.battle.player, this.playerDeckRect, "Click to draw");
     this.drawTurnPanel();
+    this.drawEnemyPreview();
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
     this.drawCards(this.battle.player.hand);
@@ -197,6 +196,79 @@ class BattleScreen {
     cards.forEach((card) => ctx.wrap(() => card.draw()));
   }
 
+  drawEnemyPreview() {
+    const card = this.battle.enemyPreviewCard;
+
+    if (!card || card.type !== "spell") return;
+
+    const width = 320;
+    const height = 128;
+    const x = canvas.width / 2 - width / 2;
+    const y = 118;
+
+    ctx.wrap(() => {
+      ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 6;
+      ctx.fillStyle = "#fffaf4";
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 20);
+      ctx.fill();
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#522567";
+      ctx.stroke();
+
+      ctx.fillStyle = "#f6cdfd";
+      ctx.fillRect(x + 18, y + 16, 78, 28);
+      ctx.fillStyle = "#522567";
+      ctx.font = "bold 14px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`SPELL ${card.cost}`, x + 57, y + 30);
+
+      ctx.fillStyle = "#222";
+      ctx.font = "bold 20px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText(card.name, x + 116, y + 30);
+
+      ctx.font = "15px Arial";
+      this.drawPreviewText(
+        card.text || card.effectLabel(),
+        x + 24,
+        y + 64,
+        272,
+        20,
+      );
+    });
+  }
+
+  drawPreviewText(text, x, y, maxWidth, lineHeight) {
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    words.forEach((word) => {
+      const nextLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (ctx.measureText(nextLine).width <= maxWidth || !currentLine) {
+        currentLine = nextLine;
+        return;
+      }
+
+      lines.push(currentLine);
+      currentLine = word;
+    });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    lines.slice(0, 3).forEach((line, index) => {
+      ctx.fillText(line, x, y + index * lineHeight);
+    });
+  }
+
   drawTargetMode() {
     if (!this.selectedAction) return;
 
@@ -255,14 +327,8 @@ class BattleScreen {
     ctx.font = "18px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText(`Turn ${this.battle.turn}`, 960, 30);
-    ctx.fillText(
-      this.battle.isPlayerTurn() ? "Player turn" : "Enemy turn",
-      960,
-      90,
-    );
     ctx.fillStyle = "#444";
-    ctx.fillText(this.getTurnMessage(), 960, 122);
+    ctx.fillText(this.getTurnMessage(), 60, 122);
 
     this.drawEndTurnButton();
   }
@@ -395,7 +461,11 @@ class BattleScreen {
 
     if (action.type === "attack") {
       if (target.kind === "hero") {
-        this.battle.attackHero(this.battle.player, action.card, this.battle.enemy);
+        this.battle.attackHero(
+          this.battle.player,
+          action.card,
+          this.battle.enemy,
+        );
       } else {
         this.battle.attackMinion(
           this.battle.player,
@@ -495,7 +565,11 @@ class BattleScreen {
   }
 
   findHoveredPlayerBoardMinion(point = mousePosition, ignoredCard = null) {
-    return this.findHoveredBoardCard(this.battle.player.board, point, ignoredCard);
+    return this.findHoveredBoardCard(
+      this.battle.player.board,
+      point,
+      ignoredCard,
+    );
   }
 
   findHoveredEnemyBoardMinion(point = mousePosition) {

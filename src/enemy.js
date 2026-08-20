@@ -1,4 +1,6 @@
 class Enemy extends Player {
+  turnPhase = "idle";
+
   constructor(name = "Enemy") {
     super(name);
   }
@@ -7,35 +9,64 @@ class Enemy extends Player {
     super.resetBattleState();
     this.maxMana = 0;
     this.mana = 0;
+    this.turnPhase = "idle";
   }
 
-  takeTurn(battle, opponent) {
+  beginTurn() {
     this.maxMana = min(10, this.maxMana + 1);
     this.refillMana();
-    battle.drawCardForEnemy();
+    this.turnPhase = "draw";
+  }
 
-    while (!battle.ended) {
+  takeStep(battle, opponent) {
+    if (this.turnPhase === "idle") {
+      return false;
+    }
+
+    if (this.turnPhase === "draw") {
+      battle.drawCardForEnemy();
+      this.turnPhase = "play";
+      return true;
+    }
+
+    if (this.turnPhase === "play") {
       const card = this.chooseCardToPlay(battle, opponent);
       const target = this.chooseCardTarget(battle, opponent, card);
 
-      if (!card) break;
-      if (!battle.playEnemyCard(this, opponent, card, target)) break;
+      if (!card) {
+        this.turnPhase = "attack";
+        battle.setStatus("Enemy prepares to attack");
+        return true;
+      }
+
+      if (!battle.playEnemyCard(this, opponent, card, target)) {
+        this.turnPhase = "attack";
+        battle.setStatus("Enemy prepares to attack");
+        return true;
+      }
+
+      return true;
     }
 
-    while (!battle.ended) {
+    if (this.turnPhase === "attack") {
       const attacker = this.chooseAttacker(battle);
 
-      if (!attacker) break;
+      if (!attacker) {
+        this.turnPhase = "done";
+        battle.setStatus("Enemy ends turn");
+        return true;
+      }
 
       const target = this.chooseAttackTarget(opponent);
 
       if (target.type === "minion") {
-        if (!battle.attackMinion(this, attacker, opponent, target.value)) break;
-        continue;
+        return battle.attackMinion(this, attacker, opponent, target.value);
       }
 
-      if (!battle.attackHero(this, attacker, opponent)) break;
+      return battle.attackHero(this, attacker, opponent);
     }
+
+    return false;
   }
 
   chooseCardToPlay(battle, opponent) {
@@ -83,6 +114,7 @@ class Enemy extends Player {
 
   chooseAttackTarget(opponent) {
     if (opponent.board.length) {
+      console.log("My board:", opponent.board);
       return {
         type: "minion",
         value: opponent.board[0],

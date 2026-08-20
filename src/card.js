@@ -72,11 +72,6 @@ class Card {
     ctx.scale(this.scale, this.scale);
     ctx.translate(-centerX, -centerY);
 
-    if (this.faceDown) {
-      this.drawCardBack();
-      return;
-    }
-
     ctx.fillStyle = "white";
     ctx.fillRect(this.x, this.y, this.width, this.height);
     ctx.lineWidth = 2;
@@ -136,14 +131,15 @@ class Card {
     ctx.font = "12px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = "black";
-    ctx.fillText(
-      this.name,
-      this.x + this.width / 2,
-      this.y + this.height / 3,
-    );
+    ctx.fillText(this.name, this.x + this.width / 2, this.y + this.height / 3);
     if (this.effects.length > 0) {
       ctx.font = "9px Arial";
-      this.drawCenteredText(this.effectLabel(), this.y + this.height / 2 + 2, 10, 4);
+      this.drawCenteredText(
+        this.effectLabel(),
+        this.y + this.height / 2 + 2,
+        10,
+        4,
+      );
     }
   }
 
@@ -213,7 +209,15 @@ class Card {
     ctx.font = "18px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("COLOR", this.x + this.width / 2, this.y + this.height / 2 - 16);
-    ctx.fillText("THIEF", this.x + this.width / 2, this.y + this.height / 2 + 16);
+    ctx.fillText(
+      "COLOR",
+      this.x + this.width / 2,
+      this.y + this.height / 2 - 16,
+    );
+    ctx.fillText(
+      "THIEF",
+      this.x + this.width / 2,
+      this.y + this.height / 2 + 16,
+    );
   }
 }

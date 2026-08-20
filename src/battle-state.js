@@ -4,6 +4,10 @@ class BattleState {
   statusMessage = "";
   lastStatusAt = 0;
   ended = false;
+  enemyStepDelay = 1500;
+  enemyStepTimer = 0;
+  enemyPreviewCard = null;
+  enemyPreviewTimer = 0;
 
   constructor(game, player, enemy, playerDeckConfig) {
     this.game = game;
@@ -14,6 +18,9 @@ class BattleState {
 
   start() {
     this.ended = false;
+    this.enemyStepTimer = 0;
+    this.enemyPreviewCard = null;
+    this.enemyPreviewTimer = 0;
     this.turn = 1;
     this.turnOwner = "player";
     this.player.setDeck(createDeckFromConfig(this.playerDeckConfig));
@@ -36,8 +43,27 @@ class BattleState {
     this.lastStatusAt = performance.now();
   }
 
-  update() {
+  showEnemyPreview(card) {
+    this.enemyPreviewCard = card;
+    this.enemyPreviewTimer = this.enemyStepDelay;
+  }
+
+  update(delta = 0) {
     if (this.ended) return;
+
+    if (this.turnOwner === "enemy") {
+      this.updateEnemyTurn(delta);
+      if (this.ended) return;
+    }
+
+    if (this.enemyPreviewTimer > 0) {
+      this.enemyPreviewTimer -= delta;
+
+      if (this.enemyPreviewTimer <= 0) {
+        this.enemyPreviewCard = null;
+        this.enemyPreviewTimer = 0;
+      }
+    }
 
     if (
       this.statusMessage &&
@@ -71,6 +97,15 @@ class BattleState {
   drawCardForEnemy() {
     if (this.ended) return;
     const card = this.enemy.drawCard();
+
+    if (card) {
+      zzfx(...CARD_DRAW_SOUND);
+      this.setStatus("Enemy drew a card");
+    } else if (!this.enemy.canDrawCard()) {
+      this.setStatus("Enemy hand is full");
+    } else {
+      this.setStatus("Enemy deck is empty");
+    }
   }
 
   canUseCard(player, opponent, card) {
@@ -140,6 +175,9 @@ class BattleState {
     player.hand.splice(cardIndex, 1);
 
     if (card.type === "spell") {
+      if (player === this.enemy) {
+        this.showEnemyPreview(card);
+      }
       if (this.cardHasDamageEffect(card)) {
         zzfx(...SPELL_DAMAGE_SOUND);
       }
@@ -396,14 +434,13 @@ class BattleState {
     this.turnOwner = "enemy";
     this.setStatus("Enemy turn");
     this.runEnemyTurn();
-    if (this.ended) return;
-    this.beginPlayerTurn();
   }
 
   runEnemyTurn() {
     if (this.ended) return;
     this.readyBoardForTurn(this.enemy);
-    this.enemy.takeTurn(this, this.player);
+    this.enemy.beginTurn();
+    this.enemyStepTimer = this.enemyStepDelay;
   }
 
   beginPlayerTurn() {
@@ -472,6 +509,19 @@ class BattleState {
       zzfx(...DEFEAT_SOUND);
     }
     this.game.showGameOver(outcome);
+  }
+
+  updateEnemyTurn(delta) {
+    this.enemyStepTimer -= delta;
+
+    if (this.enemyStepTimer > 0) return;
+
+    if (this.enemy.takeStep(this, this.player)) {
+      this.enemyStepTimer = this.enemyStepDelay;
+      return;
+    }
+
+    this.beginPlayerTurn();
   }
 }
 

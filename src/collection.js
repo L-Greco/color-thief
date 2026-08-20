@@ -146,13 +146,13 @@ unicornCards = [
     name: "Royal Blessing",
     type: "spell",
     cost: 3,
-    text: "Give a friendly minion +2/+2.",
+    text: "Give a friendly minion +2/+4.",
     effects: [
       {
         type: "buff",
         target: "friendlyMinion",
         attack: 2,
-        health: 2,
+        health: 4,
       },
     ],
   },
@@ -178,7 +178,14 @@ rainbowCards = [
     type: "minion",
     cost: 1,
     attack: 1,
-    health: 2,
+    health: 1,
+    text: "On Play: Restore 2 Health to your Hero.",
+    effects: [
+      {
+        type: "heal",
+        amount: 2,
+      },
+    ],
   },
   {
     name: "Color Sprite",
@@ -263,13 +270,13 @@ rainbowCards = [
     cost: 5,
     attack: 4,
     health: 4,
-    text: "On Play: Deal 2 damage to an enemy minion.",
+    text: "On Play: Deal 3 damage to an enemy minion.",
     effects: [
       {
         trigger: "onPlay",
         type: "damage",
         target: "enemyMinion",
-        amount: 2,
+        amount: 3,
       },
     ],
   },
@@ -314,14 +321,14 @@ rainbowCards = [
   {
     name: "Chromatic Shield",
     type: "spell",
-    cost: 2,
-    text: "Give a friendly minion +0/+3.",
+    cost: 1,
+    text: "Give a friendly minion +1/+2.",
     effects: [
       {
         type: "buff",
         target: "friendlyMinion",
-        attack: 0,
-        health: 3,
+        attack: 1,
+        health: 2,
       },
     ],
   },
@@ -354,12 +361,12 @@ rainbowCards = [
     name: "Color Wave",
     type: "spell",
     cost: 4,
-    text: "Deal 2 damage to all enemy minions.",
+    text: "Deal 3 damage to all enemy minions.",
     effects: [
       {
         type: "damage",
         target: "allEnemyMinions",
-        amount: 2,
+        amount: 3,
       },
     ],
   },
