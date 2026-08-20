@@ -7,7 +7,17 @@ unicornCards = [
     type: "minion",
     cost: 1,
     attack: 1,
-    health: 2,
+    health: 1,
+    text: "On Play: Give a friendly minion +0/+2",
+    effects: [
+      {
+        trigger: "onPlay",
+        type: "buff",
+        target: "friendlyMinion",
+        attack: 0,
+        health: 2,
+      },
+    ],
   },
   {
     name: "Sparkhorn Foal",
@@ -21,7 +31,17 @@ unicornCards = [
     type: "minion",
     cost: 2,
     attack: 2,
-    health: 3,
+    health: 2,
+    text: "On Play: Give a friendly minion +0/+2",
+    effects: [
+      {
+        trigger: "onPlay",
+        type: "buff",
+        target: "friendlyMinion",
+        attack: 0,
+        health: 2,
+      },
+    ],
   },
   {
     name: "Cloudmane Charger",
@@ -408,6 +428,13 @@ playerDeckSources = [unicornCollection, rainbowCollection];
 
 getDeckCopiesLimit = (cardConfig) =>
   cardConfig.unique ? 1 : DEFAULT_DECK_COPIES;
+
+inferCardTheme = (cardConfig) => {
+  if (unicornCards.includes(cardConfig)) return "unicorn";
+  if (rainbowCards.includes(cardConfig)) return "rainbow";
+  if (enemyStarterDeckConfig.includes(cardConfig)) return "enemy";
+  return "neutral";
+};
 
 enemyStarterDeckConfig = [
   {

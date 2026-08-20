@@ -542,6 +542,8 @@ function createDeckFromConfig(deckConfig) {
         cardConfig.attack ?? 0,
         (cardConfig.effects || []).map((effect) => ({ ...effect })),
         cardConfig.text || "",
+        !!cardConfig.unique,
+        inferCardTheme(cardConfig),
       ),
     );
   });
