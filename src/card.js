@@ -108,29 +108,27 @@ class Card {
     ctx.fill();
 
     ctx.fillStyle = palette.paper;
-    ctx.fillRect(this.x + 7, this.y + 20, this.width - 14, this.height - 27);
+    ctx.fillRect(this.x + 7, this.y + 24, this.width - 14, this.height - 31);
 
     ctx.fillStyle = palette.banner;
-    ctx.fillRect(this.x + 7, this.y + 7, this.width - 14, 18);
+    ctx.fillRect(this.x + 7, this.y + 7, this.width - 14, 22);
 
     ctx.strokeStyle = palette.border;
     ctx.lineWidth = 2;
     ctx.strokeRect(this.x + 4, this.y + 4, this.width - 8, this.height - 8);
     ctx.lineWidth = 1;
     ctx.strokeStyle = palette.innerBorder;
-    ctx.strokeRect(this.x + 8, this.y + 21, this.width - 16, this.height - 29);
 
     this.drawCostBox(palette);
     this.drawName();
     this.drawArt(artRect, palette);
     this.drawEffectBox(effectRect, palette);
     this.drawBadgeIcon(palette);
-    this.drawUniqueMark(palette);
     this.drawFooter(palette);
   }
 
   drawCostBox(palette) {
-    ctx.fillStyle = this.unique ? "#f6d365" : "#fff7dc";
+    ctx.fillStyle = "#fff7dc";
     ctx.fillRect(this.x + this.width - 28, this.y + 4, 24, 24);
     ctx.strokeStyle = palette.border;
     ctx.lineWidth = 2;
@@ -148,7 +146,14 @@ class Card {
     ctx.font = "bold 10px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    this.drawClampedText(this.name, this.x + 12, this.y + 9, this.width - 44, 10, 2);
+    this.drawClampedText(
+      this.name,
+      this.x + 12,
+      this.y + 13,
+      this.width - 44,
+      10,
+      2,
+    );
   }
 
   drawArt(rect, palette) {
@@ -191,6 +196,8 @@ class Card {
   }
 
   drawBadgeIcon(palette) {
+    if (this.type !== "minion" || !this.effects.length) return;
+
     const iconKey = this.getBadgeIconKey();
 
     if (!iconKey) return;
@@ -220,24 +227,26 @@ class Card {
     ctx.imageSmoothingEnabled = true;
   }
 
-  drawUniqueMark(palette) {
-    if (!this.unique) return;
-
-    ctx.fillStyle = "#f6d365";
-    ctx.fillRect(this.x + 7, this.y + 7, 14, 8);
-    ctx.fillStyle = palette.frame;
-    ctx.font = "bold 6px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("★", this.x + 14, this.y + 11);
-  }
-
   drawFooter(palette) {
     const footerY = this.y + this.height - 23;
 
     if (this.type === "minion") {
       this.drawStatBox(this.x + 8, footerY, "#d85f52", this.attack);
-      this.drawStatBox(this.x + this.width - 24, footerY, "#5a6ee4", this.health);
+      this.drawStatBox(
+        this.x + this.width - 24,
+        footerY,
+        "#5a6ee4",
+        this.health,
+      );
+      if (this.unique) {
+        ctx.fillStyle = palette.banner;
+        ctx.fillRect(this.x + 25, footerY - 1, this.width - 50, 18);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 8px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("UNIQUE", this.x + this.width / 2, footerY + 8);
+      }
       return;
     }
 
@@ -250,7 +259,11 @@ class Card {
     ctx.font = "bold 8px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(this.unique ? "UNIQUE SPELL" : "SPELL", this.x + this.width / 2, footerY + 8);
+    ctx.fillText(
+      this.unique ? "UNIQUE" : "SPELL",
+      this.x + this.width / 2,
+      footerY + 8,
+    );
   }
 
   drawStatBox(x, y, color, value) {
@@ -287,6 +300,10 @@ class Card {
   getArtImage() {
     if (this.type === "spell") {
       return this.getSpellIconImage();
+    }
+
+    if (this.unique && this.theme === "unicorn") {
+      return cardArtImages.unicornUnique || cardArtImages.unicorn || null;
     }
 
     return cardArtImages[this.theme] || cardArtImages.unicorn || null;
@@ -332,7 +349,8 @@ class Card {
       return;
     }
 
-    const ratio = Math.min(rect.width / image.width, rect.height / image.height) * scale;
+    const ratio =
+      Math.min(rect.width / image.width, rect.height / image.height) * scale;
     const drawWidth = image.width * ratio;
     const drawHeight = image.height * ratio;
     const dx = rect.x + (rect.width - drawWidth) / 2;
@@ -448,7 +466,15 @@ class Card {
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("COLOR", this.x + this.width / 2, this.y + this.height / 2 - 12);
-    ctx.fillText("THIEF", this.x + this.width / 2, this.y + this.height / 2 + 12);
+    ctx.fillText(
+      "COLOR",
+      this.x + this.width / 2,
+      this.y + this.height / 2 - 12,
+    );
+    ctx.fillText(
+      "THIEF",
+      this.x + this.width / 2,
+      this.y + this.height / 2 + 12,
+    );
   }
 }

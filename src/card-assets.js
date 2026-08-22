@@ -6,6 +6,7 @@ loadCardImage = (src) => {
 
 cardArtImages = {
   unicorn: loadCardImage("./assets/cards/unicorn.png"),
+  unicornUnique: loadCardImage("./assets/cards/unicorn-unique.png"),
   rainbow: loadCardImage("./assets/cards/rainbow.png"),
   enemy: loadCardImage("./assets/cards/void.png"),
 };
