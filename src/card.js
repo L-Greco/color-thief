@@ -3,6 +3,18 @@ class Card {
   hoverDuration = 0.3;
   hoverProgress = 0;
   scale = 1;
+  hitEffectTime = 0;
+  hitRotation = 0;
+  hitOverlayAlpha = 0;
+  attackEffectTime = 0;
+  attackRotation = 0;
+  attackScaleBoost = 0;
+  deathEffectTime = 0;
+  deathScale = 1;
+  deathRise = 0;
+  deathOverlayAlpha = 0;
+  drawAlpha = 1;
+  isDying = false;
 
   constructor(
     x = 0,
@@ -63,6 +75,33 @@ class Card {
     this.hasAttacked = true;
   }
 
+  triggerHitEffect() {
+    if (this.isDying) return;
+    this.hitEffectTime = HIT_EFFECT_DURATION;
+  }
+
+  triggerAttackEffect() {
+    if (this.isDying) return;
+    this.attackEffectTime = ATTACK_EFFECT_DURATION;
+  }
+
+  triggerDeathEffect() {
+    this.isDying = true;
+    this.canAttack = false;
+    this.hasAttacked = true;
+    this.attackEffectTime = 0;
+    this.attackRotation = 0;
+    this.attackScaleBoost = 0;
+    this.hitEffectTime = 0;
+    this.hitRotation = 0;
+    this.hitOverlayAlpha = 0;
+    this.deathEffectTime = DEATH_EFFECT_DURATION;
+  }
+
+  isDeathEffectFinished() {
+    return this.isDying && this.deathEffectTime <= 0;
+  }
+
   update(delta) {
     const progressDir = this.hovered ? 1 : -1;
 
@@ -74,14 +113,70 @@ class Card {
       : easeIn(this.hoverProgress);
 
     this.scale = lerp(1, 1.2, easedProgress);
+    this.attackRotation = 0;
+    this.attackScaleBoost = 0;
+    this.deathScale = 1;
+    this.deathRise = 0;
+    this.deathOverlayAlpha = 0;
+    this.drawAlpha = 1;
+
+    if (this.isDying) {
+      this.deathEffectTime = max(0, this.deathEffectTime - delta);
+
+      const progress = 1 - this.deathEffectTime / DEATH_EFFECT_DURATION;
+
+      this.deathScale = lerp(1, DEATH_EFFECT_SHRINK, progress);
+      this.deathRise = DEATH_EFFECT_RISE * easeOut(progress);
+      this.deathOverlayAlpha =
+        DEATH_EFFECT_OVERLAY_ALPHA * (1 - progress * 0.35);
+      this.drawAlpha = 1 - easeIn(progress);
+      this.hitRotation = 0;
+      this.hitOverlayAlpha = 0;
+      return;
+    }
+
+    if (this.hitEffectTime <= 0) {
+      this.hitRotation = 0;
+      this.hitOverlayAlpha = 0;
+    } else {
+      this.hitEffectTime = max(0, this.hitEffectTime - delta);
+
+      const progress = 1 - this.hitEffectTime / HIT_EFFECT_DURATION;
+      const intensity = 1 - progress;
+      const wobble = sin(progress * PI * HIT_EFFECT_FLASHES);
+      const flashPhase = sin(progress * PI * HIT_EFFECT_FLASHES * 2);
+
+      this.hitRotation = wobble * HIT_EFFECT_TILT * intensity;
+      this.hitOverlayAlpha =
+        flashPhase > 0 ? HIT_EFFECT_OVERLAY_ALPHA * intensity : 0;
+    }
+
+    if (this.attackEffectTime <= 0) {
+      return;
+    }
+
+    this.attackEffectTime = max(0, this.attackEffectTime - delta);
+
+    const attackProgress = 1 - this.attackEffectTime / ATTACK_EFFECT_DURATION;
+    const attackWave = sin(attackProgress * PI);
+    const attackDirection = sin(attackProgress * PI * 2);
+
+    this.attackRotation = attackDirection * ATTACK_EFFECT_TILT;
+    this.attackScaleBoost = ATTACK_EFFECT_SCALE * attackWave;
   }
 
   draw() {
     const centerX = this.x + this.width / 2;
     const centerY = this.y + this.height / 2;
 
+    ctx.globalAlpha = this.drawAlpha;
     ctx.translate(centerX, centerY);
-    ctx.scale(this.scale, this.scale);
+    ctx.translate(0, -this.deathRise);
+    ctx.rotate(this.hitRotation + this.attackRotation);
+    ctx.scale(
+      (this.scale + this.attackScaleBoost) * this.deathScale,
+      (this.scale + this.attackScaleBoost) * this.deathScale,
+    );
     ctx.translate(-centerX, -centerY);
 
     if (this.faceDown) {
@@ -125,6 +220,26 @@ class Card {
     this.drawEffectBox(effectRect, palette);
     this.drawBadgeIcon(palette);
     this.drawFooter(palette);
+    this.drawHitOverlay();
+    this.drawDeathOverlay();
+  }
+
+  drawHitOverlay() {
+    if (this.hitOverlayAlpha <= 0) return;
+
+    ctx.fillStyle = `rgba(255, 70, 70, ${this.hitOverlayAlpha})`;
+    ctx.beginPath();
+    ctx.roundRect(this.x + 3, this.y + 3, this.width - 6, this.height - 6, 6);
+    ctx.fill();
+  }
+
+  drawDeathOverlay() {
+    if (this.deathOverlayAlpha <= 0) return;
+
+    ctx.fillStyle = `rgba(255, 45, 45, ${this.deathOverlayAlpha})`;
+    ctx.beginPath();
+    ctx.roundRect(this.x + 2, this.y + 2, this.width - 4, this.height - 4, 8);
+    ctx.fill();
   }
 
   drawCostBox(palette) {

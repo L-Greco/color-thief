@@ -114,7 +114,6 @@ class Enemy extends Player {
 
   chooseAttackTarget(opponent) {
     if (opponent.board.length) {
-      console.log("My board:", opponent.board);
       return {
         type: "minion",
         value: opponent.board[0],

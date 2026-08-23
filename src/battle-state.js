@@ -8,6 +8,7 @@ class BattleState {
   enemyStepTimer = 0;
   enemyPreviewCard = null;
   enemyPreviewTimer = 0;
+  pendingMinionDeaths = [];
 
   constructor(game, player, enemy, playerDeckConfig) {
     this.game = game;
@@ -21,6 +22,7 @@ class BattleState {
     this.enemyStepTimer = 0;
     this.enemyPreviewCard = null;
     this.enemyPreviewTimer = 0;
+    this.pendingMinionDeaths = [];
     this.turn = 1;
     this.turnOwner = "player";
     this.player.setDeck(createDeckFromConfig(this.playerDeckConfig));
@@ -50,6 +52,8 @@ class BattleState {
 
   update(delta = 0) {
     if (this.ended) return;
+
+    this.updatePendingMinionDeaths();
 
     if (this.turnOwner === "enemy") {
       this.updateEnemyTurn(delta);
@@ -301,6 +305,7 @@ class BattleState {
 
   damageMinion(controller, minion, amount, opponent) {
     minion.health -= amount;
+    minion.triggerHitEffect();
 
     if (minion.health > 0) return;
 
@@ -308,12 +313,34 @@ class BattleState {
   }
 
   destroyMinion(controller, minion, opponent) {
-    const minionIndex = controller.board.indexOf(minion);
+    if (!controller.board.includes(minion) || minion.isDying) return;
 
-    if (minionIndex === -1) return;
+    minion.triggerDeathEffect();
+    this.pendingMinionDeaths.push({ controller, minion, opponent });
+  }
 
-    controller.board.splice(minionIndex, 1);
-    this.resolveCardEffects(minion, "onDeath", controller, opponent);
+  updatePendingMinionDeaths() {
+    if (!this.pendingMinionDeaths.length) return;
+
+    this.pendingMinionDeaths = this.pendingMinionDeaths.filter((entry) => {
+      if (!entry.minion.isDeathEffectFinished()) {
+        return true;
+      }
+
+      const minionIndex = entry.controller.board.indexOf(entry.minion);
+
+      if (minionIndex !== -1) {
+        entry.controller.board.splice(minionIndex, 1);
+        this.resolveCardEffects(
+          entry.minion,
+          "onDeath",
+          entry.controller,
+          entry.opponent,
+        );
+      }
+
+      return false;
+    });
   }
 
   validateCardTarget(card, player, opponent, target) {
@@ -376,8 +403,10 @@ class BattleState {
 
     zzfx(...MINION_ATTACK_SOUND);
     attacker.exhaust();
+    attacker.triggerAttackEffect();
     defender.health -= attackerDamage;
     attacker.health -= defenderDamage;
+    defender.triggerHitEffect();
 
     if (defender.health <= 0) {
       this.destroyMinion(defenderController, defender, attackerController);
@@ -402,6 +431,7 @@ class BattleState {
 
     zzfx(...MINION_ATTACK_SOUND);
     attacker.exhaust();
+    attacker.triggerAttackEffect();
     defender.takeDamage(attacker.attack || 0);
     if (this.checkGameOver()) return true;
     this.setStatus(`${attacker.name} attacked ${defender.name}`);
