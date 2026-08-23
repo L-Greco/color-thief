@@ -9,6 +9,10 @@ class Card {
   attackEffectTime = 0;
   attackRotation = 0;
   attackScaleBoost = 0;
+  attackDirectionX = 0;
+  attackDirectionY = 0;
+  attackOffsetX = 0;
+  attackOffsetY = 0;
   deathEffectTime = 0;
   deathScale = 1;
   deathRise = 0;
@@ -80,9 +84,17 @@ class Card {
     this.hitEffectTime = HIT_EFFECT_DURATION;
   }
 
-  triggerAttackEffect() {
+  triggerAttackEffect(targetX = this.x, targetY = this.y) {
     if (this.isDying) return;
     this.attackEffectTime = ATTACK_EFFECT_DURATION;
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    const dx = targetX - centerX;
+    const dy = targetY - centerY;
+    const distance = hypot(dx, dy) || 1;
+
+    this.attackDirectionX = dx / distance;
+    this.attackDirectionY = dy / distance;
   }
 
   triggerDeathEffect() {
@@ -92,6 +104,10 @@ class Card {
     this.attackEffectTime = 0;
     this.attackRotation = 0;
     this.attackScaleBoost = 0;
+    this.attackDirectionX = 0;
+    this.attackDirectionY = 0;
+    this.attackOffsetX = 0;
+    this.attackOffsetY = 0;
     this.hitEffectTime = 0;
     this.hitRotation = 0;
     this.hitOverlayAlpha = 0;
@@ -115,6 +131,8 @@ class Card {
     this.scale = lerp(1, 1.2, easedProgress);
     this.attackRotation = 0;
     this.attackScaleBoost = 0;
+    this.attackOffsetX = 0;
+    this.attackOffsetY = 0;
     this.deathScale = 1;
     this.deathRise = 0;
     this.deathOverlayAlpha = 0;
@@ -163,6 +181,8 @@ class Card {
 
     this.attackRotation = attackDirection * ATTACK_EFFECT_TILT;
     this.attackScaleBoost = ATTACK_EFFECT_SCALE * attackWave;
+    this.attackOffsetX = this.attackDirectionX * ATTACK_EFFECT_LUNGE * attackWave;
+    this.attackOffsetY = this.attackDirectionY * ATTACK_EFFECT_LUNGE * attackWave;
   }
 
   draw() {
@@ -171,6 +191,7 @@ class Card {
 
     ctx.globalAlpha = this.drawAlpha;
     ctx.translate(centerX, centerY);
+    ctx.translate(this.attackOffsetX, this.attackOffsetY);
     ctx.translate(0, -this.deathRise);
     ctx.rotate(this.hitRotation + this.attackRotation);
     ctx.scale(

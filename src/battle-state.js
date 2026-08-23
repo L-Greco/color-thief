@@ -400,10 +400,12 @@ class BattleState {
 
     const attackerDamage = attacker.attack || 0;
     const defenderDamage = defender.attack || 0;
+    const defenderCenterX = defender.x + defender.width / 2;
+    const defenderCenterY = defender.y + defender.height / 2;
 
     zzfx(...MINION_ATTACK_SOUND);
     attacker.exhaust();
-    attacker.triggerAttackEffect();
+    attacker.triggerAttackEffect(defenderCenterX, defenderCenterY);
     defender.health -= attackerDamage;
     attacker.health -= defenderDamage;
     defender.triggerHitEffect();
@@ -431,7 +433,7 @@ class BattleState {
 
     zzfx(...MINION_ATTACK_SOUND);
     attacker.exhaust();
-    attacker.triggerAttackEffect();
+    attacker.triggerAttackEffect(canvas.width / 2, defender === this.player ? 690 : 30);
     defender.takeDamage(attacker.attack || 0);
     if (this.checkGameOver()) return true;
     this.setStatus(`${attacker.name} attacked ${defender.name}`);
