@@ -312,6 +312,22 @@ class Card {
       return;
     }
 
+    if (this.type === "spell" && this.getBadgeIconKey() === "damage") {
+      const lightningScale = Math.min(rect.width / 40, rect.height / 40) * 0.75;
+      drawLightning(
+        rect.x + rect.width / 2,
+        rect.y + rect.height / 2,
+        lightningScale,
+      );
+      return;
+    }
+
+    if (this.type === "spell" && this.getBadgeIconKey() === "support") {
+      const starScale = Math.min(rect.width / 52, rect.height / 52) * 0.75;
+      drawStar(rect.x + rect.width / 2, rect.y + rect.height / 2, starScale);
+      return;
+    }
+
     const image = this.getArtImage();
 
     if (image && image.complete) {
@@ -358,6 +374,16 @@ class Card {
     ctx.strokeStyle = palette.border;
     ctx.lineWidth = 1;
     ctx.strokeRect(this.x + 8, this.y + 29, 16, 16);
+
+    if (iconKey === "damage") {
+      drawLightning(this.x + 16, this.y + 37, 0.3);
+      return;
+    }
+
+    if (iconKey === "support") {
+      drawStar(this.x + 16, this.y + 37, 0.22);
+      return;
+    }
 
     if (!spellIconSheet.complete) return;
 

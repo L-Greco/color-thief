@@ -258,9 +258,96 @@ class RainbowFairyMinionArt {
   }
 }
 
+class EnemyMinionArt {
+  draw(rect) {
+    const sourceWidth = 64;
+    const sourceHeight = 96;
+    const scale = Math.min(
+      rect.width / sourceWidth,
+      rect.height / sourceHeight,
+    );
+    const width = sourceWidth * scale;
+    const height = sourceHeight * scale;
+    const x = rect.x + (rect.width - width) / 2;
+    const y = rect.y + (rect.height - height) / 2;
+
+    ctx.fillStyle = "#000";
+    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+    ctx.save();
+    // The source art keeps the editor's bottom-right coordinate system.
+    ctx.translate(x + width, y + height);
+    ctx.scale(-scale, -scale);
+    this.drawEnemy();
+    ctx.restore();
+  }
+
+  drawEnemy() {
+    const spX = 32;
+    const spY = 45;
+    const scale = 1.4;
+
+    ctx.save();
+    ctx.translate(spX, spY);
+    ctx.scale(scale, scale);
+    ctx.translate(-spX, -spY);
+
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(spX + 16.32, spY - 8.93);
+    ctx.quadraticCurveTo(spX + 16.61, spY - 10.69, spX + 15.29, spY - 12.45);
+    ctx.quadraticCurveTo(spX + 23.1, spY - 9.96, spX + 22.8, spY + 2.94);
+    ctx.lineTo(spX + 15.88, spY - 1.6);
+    ctx.quadraticCurveTo(spX + 14.7, spY + 11.74, spX + 3.65, spY + 13.65);
+    ctx.quadraticCurveTo(spX + 5.57, spY + 20.1, spX - 0.91, spY + 23.91);
+    ctx.bezierCurveTo(
+      spX - 2.53,
+      spY + 16.87,
+      spX - 5.63,
+      spY + 19.36,
+      spX - 7.1,
+      spY + 14.09,
+    );
+    ctx.quadraticCurveTo(spX - 18.29, spY + 11.74, spX - 19.91, spY - 1.16);
+    ctx.lineTo(spX - 26.84, spY + 3.68);
+    ctx.quadraticCurveTo(spX - 27.28, spY - 7.91, spX - 19.91, spY - 12.16);
+    ctx.lineTo(spX - 20.36, spY - 8.49);
+    ctx.quadraticCurveTo(spX - 22.71, spY - 8.2, spX - 23.74, spY - 1.6);
+    ctx.lineTo(spX - 19.18, spY - 4.68);
+    ctx.quadraticCurveTo(spX - 20.36, spY - 17.29, spX - 8.28, spY - 20.96);
+    ctx.quadraticCurveTo(spX + 7.48, spY - 23.45, spX + 12.2, spY - 15.68);
+    ctx.quadraticCurveTo(spX + 15.44, spY - 14.65, spX + 15.58, spY - 4.83);
+    ctx.lineTo(spX + 20, spY - 1.9);
+    ctx.quadraticCurveTo(spX + 18.68, spY - 8.35, spX + 16.03, spY - 9.23);
+    ctx.closePath();
+    ctx.fill();
+
+    this.drawEye(spX, spY, 0, true);
+    this.drawEye(spX, spY, 22, false);
+    ctx.restore();
+  }
+
+  drawEye(spX, spY, offsetX, mirrored) {
+    const startX = spX - 13 + offsetX;
+    const direction = mirrored ? -1 : 1;
+    const x = (distance) => startX + distance * direction;
+    const eyeY = spY - 8;
+
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.moveTo(startX, eyeY + 5.57);
+    ctx.lineTo(x(-9.14), eyeY);
+    ctx.quadraticCurveTo(x(-6.04), eyeY - 2.79, x(-2.66), eyeY - 2.5);
+    ctx.quadraticCurveTo(x(1.62), eyeY + 0.58, startX, eyeY + 5.27);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
 minionArtRenderers = {
   unicorn: new UnicornMinionArt(),
   rainbow: new RainbowFairyMinionArt(),
+  enemy: new EnemyMinionArt(),
 };
 
 drawMinionArt = (theme, rect, options = {}) => {
