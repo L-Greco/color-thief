@@ -181,8 +181,10 @@ class Card {
 
     this.attackRotation = attackDirection * ATTACK_EFFECT_TILT;
     this.attackScaleBoost = ATTACK_EFFECT_SCALE * attackWave;
-    this.attackOffsetX = this.attackDirectionX * ATTACK_EFFECT_LUNGE * attackWave;
-    this.attackOffsetY = this.attackDirectionY * ATTACK_EFFECT_LUNGE * attackWave;
+    this.attackOffsetX =
+      this.attackDirectionX * ATTACK_EFFECT_LUNGE * attackWave;
+    this.attackOffsetY =
+      this.attackDirectionY * ATTACK_EFFECT_LUNGE * attackWave;
   }
 
   draw() {
@@ -207,6 +209,7 @@ class Card {
 
     const palette = this.getPalette();
     const artRect = this.getArtRect();
+    console.log(artRect);
     const effectRect = this.getEffectRect();
 
     ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
@@ -298,6 +301,16 @@ class Card {
     ctx.strokeStyle = palette.innerBorder;
     ctx.lineWidth = 1;
     ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+    if (
+      this.type === "minion" &&
+      drawMinionArt(this.theme, rect, {
+        unique: this.unique,
+        card: this,
+      })
+    ) {
+      return;
+    }
 
     const image = this.getArtImage();
 

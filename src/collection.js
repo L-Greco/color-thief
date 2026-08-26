@@ -662,17 +662,12 @@ enemyStarterDeckConfig = [
     attack: 5,
     health: 6,
     unique: true,
-    text: "On Play: Deal 4 damage to all enemy minions and 4 damage to the enemy hero.",
+    text: "On Play: Deal 4 damage to all enemy minions.",
     effects: [
       {
         trigger: "onPlay",
         type: "damage",
         target: "allEnemyMinions",
-        amount: 4,
-      },
-      {
-        trigger: "onPlay",
-        type: "damage",
         amount: 4,
       },
     ],
