@@ -194,7 +194,7 @@ unicornCards = [
 
 rainbowCards = [
   {
-    name: "Rainbow Goblin",
+    name: "Rainbow Fairy",
     type: "minion",
     cost: 1,
     attack: 1,
