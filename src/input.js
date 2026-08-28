@@ -48,6 +48,11 @@ canvas.addEventListener("click", () => {
 document.addEventListener("keydown", (e) => {
   ensureAudioReady();
 
+  if (game.screen && game.screen.handleKeyDown && game.screen.handleKeyDown(e)) {
+    e.preventDefault();
+    return;
+  }
+
   if (e.code === "KeyD" && game.battle) {
     game.battle.drawCardForPlayer();
   }

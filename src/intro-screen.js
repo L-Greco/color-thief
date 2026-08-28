@@ -1,10 +1,20 @@
 class IntroScreen {
   constructor(game) {
     this.game = game;
+    this.titleExitProgress = 0;
+    this.storyTime = 0;
   }
 
-  update() {
-    canvas.style.cursor = "pointer";
+  update(delta) {
+    if (this.titleExitProgress < 1) {
+      this.titleExitProgress = min(
+        1,
+        this.titleExitProgress + delta / INTRO_TITLE_EXIT_DURATION,
+      );
+      return;
+    }
+
+    this.storyTime += delta;
   }
 
   draw() {
@@ -17,50 +27,183 @@ class IntroScreen {
 
     drawStarfield(this.game.stars);
     this.drawPlanet();
-    this.drawTitle();
+
+    if (this.titleExitProgress < 1) {
+      this.drawTitle();
+      return;
+    }
+
+    this.drawColorEssence();
+    this.drawThief();
+    this.drawStoryText();
   }
 
   drawPlanet() {
-    const x = canvas.width * 0.72;
-    const y = canvas.height * 0.58;
-    const radius = 210;
-    const halo = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius * 1.55);
-    halo.addColorStop(0, "rgba(214, 224, 236, 0.22)");
-    halo.addColorStop(1, "rgba(214, 224, 236, 0)");
-
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(x, y, radius * 1.55, 0, PI * 2);
-    ctx.fill();
-
-    const planet = ctx.createRadialGradient(
-      x - radius * 0.32,
-      y - radius * 0.32,
-      0,
-      x - radius * 0.2,
-      y - radius * 0.2,
-      radius,
+    drawStoryPlanet(
+      canvas.width * 0.72,
+      canvas.height * 0.58,
+      210,
+      this.getDrainProgress(),
     );
-    planet.addColorStop(0, "#d4d8dc");
-    planet.addColorStop(0.55, "#7d848c");
-    planet.addColorStop(1, "#252b34");
-
-    ctx.fillStyle = planet;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, PI * 2);
-    ctx.fill();
   }
 
   drawTitle() {
+    const exitProgress = easeIn(this.titleExitProgress);
+    const x = 105 - exitProgress * (canvas.width + 420);
+
     ctx.shadowColor = "rgba(230, 241, 255, 0.55)";
     ctx.shadowBlur = 20;
     ctx.fillStyle = "#f8f6e9";
     ctx.font = "900 92px Georgia";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText("Color", 105, 302);
-    ctx.fillText("Thief", 105, 390);
+    ctx.fillText("Color", x, 302);
+    ctx.fillText("Thief", x, 390);
     ctx.shadowColor = "transparent";
+  }
+
+  getThiefEnterProgress() {
+    return min(
+      1,
+      max(0, (this.storyTime - INTRO_OPENING_DURATION) / INTRO_THIEF_ENTER_DURATION),
+    );
+  }
+
+  getDrainProgress() {
+    return min(
+      1,
+      max(
+        0,
+        (this.storyTime - INTRO_OPENING_DURATION - INTRO_THIEF_ENTER_DURATION) /
+          INTRO_DRAIN_DURATION,
+      ),
+    );
+  }
+
+  getStoryFadeProgress() {
+    const drainEnd =
+      INTRO_OPENING_DURATION + INTRO_THIEF_ENTER_DURATION + INTRO_DRAIN_DURATION;
+
+    return min(
+      1,
+      max(0, (this.storyTime - drainEnd) / INTRO_STORY_FADE_DURATION),
+    );
+  }
+
+  getFinalMessageProgress() {
+    const finalMessageStart =
+      INTRO_OPENING_DURATION +
+      INTRO_THIEF_ENTER_DURATION +
+      INTRO_DRAIN_DURATION +
+      INTRO_STORY_FADE_DURATION;
+
+    return min(
+      1,
+      max(
+        0,
+        (this.storyTime - finalMessageStart) / INTRO_FINAL_MESSAGE_FADE_DURATION,
+      ),
+    );
+  }
+
+  drawThief() {
+    const enterProgress = easeOut(this.getThiefEnterProgress());
+    const x = lerp(canvas.width + 80, 300, enterProgress);
+    drawColorThief(x, 100, 5.2, this.getDrainProgress());
+  }
+
+  drawColorEssence() {
+    const drainProgress = this.getDrainProgress();
+    if (drainProgress <= 0) return;
+
+    const planetX = canvas.width * 0.72;
+    const planetY = canvas.height * 0.58;
+    const colors = ["#f85b9d", "#f58b04", "#fbe201", "#1af6fb", "#0260fb", "#a500f7"];
+
+    for (let index = 0; index < INTRO_ESSENCE_PARTICLE_COUNT; index += 1) {
+      const color = colors[index % colors.length];
+      const progress = max(0, min(1, drainProgress * 2 - index * 0.055));
+      const sourceX = planetX + cos(index * 1.3) * 130;
+      const sourceY = planetY + sin(index * 1.3) * 130;
+      const targetX = 480;
+      const targetY = 410;
+      const absorbOpacity = min(1, (1 - progress) * 4);
+
+      ctx.fillStyle = color;
+      ctx.globalAlpha = absorbOpacity;
+      ctx.beginPath();
+      ctx.arc(
+        lerp(sourceX, targetX, easeIn(progress)),
+        lerp(sourceY, targetY, easeIn(progress)),
+        10 - progress * 4,
+        0,
+        PI * 2,
+      );
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  drawStoryText() {
+    const secondLineVisible = this.getThiefEnterProgress() > 0;
+    const storyFadeProgress = this.getStoryFadeProgress();
+    const finalMessageProgress = this.getFinalMessageProgress();
+
+    ctx.shadowColor = "rgba(230, 241, 255, 0.55)";
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = "#f8f6e9";
+    ctx.font = "bold 28px Georgia";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.globalAlpha = 1 - storyFadeProgress;
+
+    if (storyFadeProgress < 1) {
+      ctx.fillText(
+        "On the planet Chroma, unicorns and rainbows lived happily and peacefully.",
+        canvas.width / 2,
+        90,
+      );
+
+      if (secondLineVisible) {
+        ctx.fillText(
+          "Until the Color Thief appeared and stole their color essence!",
+          canvas.width / 2,
+          132,
+        );
+      }
+    }
+
+    if (finalMessageProgress > 0) {
+      ctx.globalAlpha = finalMessageProgress;
+      ctx.fillText(
+        "Now unicorns and rainbow fairies must unite to defeat the Color Thief!",
+        canvas.width / 2,
+        110,
+      );
+    }
+
+    if (finalMessageProgress === 1) {
+      const promptOpacity = 0.65 + sin(this.storyTime / 240) * 0.25;
+      ctx.globalAlpha = promptOpacity;
+      ctx.font = "bold 20px Georgia";
+      ctx.fillText("Press Enter or Space to continue", canvas.width / 2, 164);
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = "transparent";
+  }
+
+  handleKeyDown(event) {
+    if (
+      this.getFinalMessageProgress() < 1 ||
+      (event.code !== "Enter" && event.code !== "Space")
+    ) {
+      return false;
+    }
+
+    this.game.startDeckBuilding();
+    return true;
   }
 
   handlePointerDown() {}
@@ -72,7 +215,6 @@ class IntroScreen {
   }
 
   handleClick() {
-    this.game.startDeckBuilding();
-    return true;
+    return false;
   }
 }

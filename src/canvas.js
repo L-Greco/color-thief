@@ -70,6 +70,131 @@ drawStarfield = (stars, opacity = 1) => {
   });
 };
 
+drawStoryPlanet = (x, y, radius, greyProgress = 0) => {
+  const halo = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius * 1.55);
+  halo.addColorStop(0, `rgba(230, 241, 255, ${0.28 - greyProgress * 0.08})`);
+  halo.addColorStop(1, "rgba(230, 241, 255, 0)");
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(x, y, radius * 1.55, 0, PI * 2);
+  ctx.fill();
+
+  ctx.wrap(() => {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, PI * 2);
+    ctx.clip();
+
+    const rainbow = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
+    rainbow.addColorStop(0, "#f85b9d");
+    rainbow.addColorStop(0.22, "#f58b04");
+    rainbow.addColorStop(0.4, "#fbe201");
+    rainbow.addColorStop(0.58, "#1af6fb");
+    rainbow.addColorStop(0.76, "#0260fb");
+    rainbow.addColorStop(1, "#a500f7");
+    ctx.fillStyle = rainbow;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+
+    const grey = ctx.createRadialGradient(
+      x - radius * 0.32,
+      y - radius * 0.32,
+      0,
+      x - radius * 0.2,
+      y - radius * 0.2,
+      radius,
+    );
+    grey.addColorStop(0, "#d4d8dc");
+    grey.addColorStop(0.55, "#7d848c");
+    grey.addColorStop(1, "#252b34");
+    ctx.globalAlpha = greyProgress;
+    ctx.fillStyle = grey;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+  });
+};
+
+drawColorThief = (x, y, scale, powerProgress = 0) => {
+  const spX = 42;
+  const spY = 29;
+
+  ctx.wrap(() => {
+    // This keeps the intro model aligned with the editor's reversed axes.
+    ctx.translate(x + 64 * scale, y + 96 * scale);
+    ctx.scale(-scale, -scale);
+
+    drawColorThiefShape(spX, spY, "#7d848c");
+
+    if (powerProgress > 0) {
+      const gradient = ctx.createLinearGradient(
+        spX - 35,
+        spY + 28,
+        spX + 25,
+        spY - 21,
+      );
+      gradient.addColorStop(0, "#31114c");
+      gradient.addColorStop(0.38, "#8c1cc7");
+      gradient.addColorStop(0.68, "#fa5efb");
+      gradient.addColorStop(1, "#4a126c");
+      ctx.globalAlpha = powerProgress;
+      drawColorThiefShape(spX, spY, gradient);
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.fillStyle = "#000";
+    drawColorThiefEye(spX, spY, 1);
+    drawColorThiefEye(spX, spY, -1);
+  });
+};
+
+drawColorThiefShape = (spX, spY, color) => {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(spX, spY);
+  ctx.quadraticCurveTo(spX + 5, spY + 25, spX - 15, spY + 28);
+  ctx.quadraticCurveTo(spX - 35, spY + 25, spX - 30, spY);
+  ctx.quadraticCurveTo(spX - 16, spY - 11, spX - 15, spY - 11);
+  ctx.quadraticCurveTo(spX - 1, spY - 1, spX, spY - 1);
+  ctx.closePath();
+  ctx.fill();
+
+  drawColorThiefCollar(spX, spY, 1, color);
+  drawColorThiefCollar(spX, spY, -1, color);
+
+  ctx.beginPath();
+  ctx.moveTo(spX - 11, spY - 16);
+  ctx.lineTo(spX - 15, spY - 12);
+  ctx.lineTo(spX - 19, spY - 16);
+  ctx.lineTo(spX - 15, spY - 19);
+  ctx.closePath();
+  ctx.fill();
+};
+
+drawColorThiefCollar = (spX, spY, direction, color) => {
+  const collarAxisX = spX - 15;
+  const collarGap = 4;
+  const x = (distance) => collarAxisX + direction * (distance + collarGap / 2);
+
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x(1), spY - 12);
+  ctx.lineTo(x(4), spY - 16);
+  ctx.quadraticCurveTo(x(10), spY - 8, x(25), spY - 1);
+  ctx.quadraticCurveTo(x(25), spY + 1, x(17), spY + 1);
+  ctx.quadraticCurveTo(x(17), spY - 1, x(16), spY - 2);
+  ctx.quadraticCurveTo(x(1), spY - 12, x(1), spY - 12);
+  ctx.fill();
+};
+
+drawColorThiefEye = (spX, spY, direction) => {
+  const eyeAxisX = spX - 15;
+  const x = (distance) => eyeAxisX + direction * distance;
+
+  ctx.beginPath();
+  ctx.moveTo(x(12), spY + 11);
+  ctx.lineTo(x(3), spY + 4);
+  ctx.quadraticCurveTo(x(13), spY - 1, x(12), spY + 11);
+  ctx.closePath();
+  ctx.fill();
+};
+
 drawX = (x, y, scale = 1, color = "#000") => {
   const arm = 2 * scale;
 
