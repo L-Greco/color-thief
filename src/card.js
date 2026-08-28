@@ -19,6 +19,7 @@ class Card {
   deathOverlayAlpha = 0;
   drawAlpha = 1;
   isDying = false;
+  isTargetSource = false;
 
   constructor(
     x = 0,
@@ -232,9 +233,15 @@ class Card {
     ctx.fillStyle = palette.banner;
     ctx.fillRect(this.x + 7, this.y + 7, this.width - 14, 22);
 
-    ctx.strokeStyle = palette.border;
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = this.isTargetSource ? "#61ff4e" : palette.border;
+    ctx.lineWidth = this.isTargetSource ? 4 : 2;
+    if (this.isTargetSource) {
+      ctx.shadowColor = "rgba(97, 255, 78, 0.85)";
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 0;
+    }
     ctx.strokeRect(this.x + 4, this.y + 4, this.width - 8, this.height - 8);
+    ctx.shadowColor = "transparent";
     ctx.lineWidth = 1;
     ctx.strokeStyle = palette.innerBorder;
 

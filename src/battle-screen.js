@@ -272,20 +272,17 @@ class BattleScreen {
   drawTargetMode() {
     if (!this.selectedAction) return;
 
-    ctx.wrap(() => this.drawActionSource());
     this.getActionTargets().forEach((target) =>
       ctx.wrap(() => this.drawTargetMarker(target)),
     );
   }
 
-  drawActionSource() {
-    const card = this.selectedAction.card;
+  setSelectedAction(action) {
+    if (this.selectedAction) this.selectedAction.card.isTargetSource = false;
 
-    ctx.strokeStyle = "#2e9d44";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.roundRect(card.x - 4, card.y - 4, card.width + 8, card.height + 8, 18);
-    ctx.stroke();
+    this.selectedAction = action;
+
+    if (action) action.card.isTargetSource = true;
   }
 
   drawTargetMarker(target) {
@@ -420,22 +417,22 @@ class BattleScreen {
     const boardMinion = this.findHoveredPlayerBoardMinion(point);
 
     if (boardMinion && this.canStartAttackSelection(boardMinion)) {
-      this.selectedAction = {
+      this.setSelectedAction({
         type: "attack",
         card: boardMinion,
         targetType: "enemyMinion",
-      };
+      });
       return true;
     }
 
     const handCard = this.findHoveredHandCard(point);
 
     if (handCard && this.canStartCardTargetSelection(handCard)) {
-      this.selectedAction = {
+      this.setSelectedAction({
         type: "card",
         card: handCard,
         targetType: this.battle.getRequiredTargetType(handCard),
-      };
+      });
       return true;
     }
 
@@ -447,13 +444,13 @@ class BattleScreen {
 
     if (!action) return false;
     if (this.isPointOnCard(point, action.card)) {
-      this.selectedAction = null;
+      this.setSelectedAction(null);
       return true;
     }
 
     const target = this.findActionTarget(point);
 
-    this.selectedAction = null;
+    this.setSelectedAction(null);
 
     if (!target) {
       return true;
@@ -525,7 +522,7 @@ class BattleScreen {
       this.endTurnPressed = false;
 
       if (pointCollision(this.endTurnRect, point)) {
-        this.selectedAction = null;
+        this.setSelectedAction(null);
         this.battle.endTurn();
         return true;
       }
