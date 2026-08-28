@@ -33,6 +33,43 @@ ctx.wrap = (callback) => {
   ctx.restore();
 };
 
+createStarfield = (count = 180) => {
+  const stars = [];
+
+  for (let index = 0; index < count; index += 1) {
+    const speed = 8 + Math.random() * 24;
+    const direction = Math.random() * PI * 2;
+
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: 0.4 + Math.random() * 1.6,
+      xVelocity: cos(direction) * speed,
+      yVelocity: sin(direction) * speed,
+    });
+  }
+
+  return stars;
+};
+
+updateStarfield = (stars, delta) => {
+  const elapsedSeconds = delta / 1000;
+
+  stars.forEach((star) => {
+    star.x = (star.x + star.xVelocity * elapsedSeconds + canvas.width) % canvas.width;
+    star.y = (star.y + star.yVelocity * elapsedSeconds + canvas.height) % canvas.height;
+  });
+};
+
+drawStarfield = (stars, opacity = 1) => {
+  stars.forEach((star) => {
+    ctx.fillStyle = `rgba(255, 255, 255, ${(0.4 + star.radius / 3) * opacity})`;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.radius, 0, PI * 2);
+    ctx.fill();
+  });
+};
+
 drawX = (x, y, scale = 1, color = "#000") => {
   const arm = 2 * scale;
 

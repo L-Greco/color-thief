@@ -139,16 +139,17 @@ class BattleScreen {
 
   drawBackground() {
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#eef8ff");
-    gradient.addColorStop(0.5, "#fff4fb");
-    gradient.addColorStop(1, "#fef6d8");
+    gradient.addColorStop(0, "#080d20");
+    gradient.addColorStop(0.5, "#172244");
+    gradient.addColorStop(1, "#331d3d");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    this.fillZone(BATTLE_LAYOUT.enemyBoard, "#f8fbff");
-    this.fillZone(BATTLE_LAYOUT.playerBoard, "#fffdf8");
-    this.fillZone(BATTLE_LAYOUT.playerHand, "#fff8fc");
-    this.fillZone(BATTLE_LAYOUT.enemyStatus, "#ffffffaa");
-    this.fillZone(BATTLE_LAYOUT.playerStatus, "#ffffffaa");
+    drawStarfield(this.battle.game.stars, 0.6);
+    this.fillZone(BATTLE_LAYOUT.enemyBoard, "#f8fbffdf");
+    this.fillZone(BATTLE_LAYOUT.playerBoard, "#fffdf8df");
+    this.fillZone(BATTLE_LAYOUT.playerHand, "#fff8fcdf");
+    this.fillZone(BATTLE_LAYOUT.enemyStatus, "#ffffffd0");
+    this.fillZone(BATTLE_LAYOUT.playerStatus, "#ffffffd0");
   }
 
   fillZone(zone, color) {

@@ -6,13 +6,14 @@ states = {
 };
 
 class Game {
-  state = states.deckBuilding;
+  state = states.intro;
   screen = null;
   battle = null;
 
   constructor(player, enemy) {
     this.player = player;
     this.enemy = enemy;
+    this.stars = createStarfield();
   }
 
   setState(newState) {
@@ -21,6 +22,12 @@ class Game {
 
   setScreen(screen) {
     this.screen = screen;
+  }
+
+  startIntro() {
+    this.state = states.intro;
+    this.battle = null;
+    this.setScreen(new IntroScreen(this));
   }
 
   startDeckBuilding() {
@@ -43,6 +50,8 @@ class Game {
   }
 
   update(delta) {
+    updateStarfield(this.stars, delta);
+
     if (this.battle) {
       this.battle.update(delta);
     }

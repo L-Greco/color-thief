@@ -213,6 +213,26 @@ class Card {
     console.log(artRect);
     const effectRect = this.getEffectRect();
 
+    if (this.isTargetSource) {
+      const centerX = this.x + this.width / 2;
+      const centerY = this.y + this.height / 2;
+      const haloRadius = max(this.width, this.height) * 0.9;
+      const halo = ctx.createRadialGradient(
+        centerX,
+        centerY,
+        this.width * 0.2,
+        centerX,
+        centerY,
+        haloRadius,
+      );
+      halo.addColorStop(0, "rgba(132, 255, 102, 0.38)");
+      halo.addColorStop(1, "rgba(132, 255, 102, 0)");
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, haloRadius, 0, PI * 2);
+      ctx.fill();
+    }
+
     ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
     ctx.shadowBlur = 10;
     ctx.shadowOffsetY = 4;

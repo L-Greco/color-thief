@@ -38,32 +38,18 @@ class DeckBuildingScreen {
   }
 
   drawBackground() {
-    const gradient = ctx.createLinearGradient(
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
-    gradient.addColorStop(0, "#fff0f6");
-    gradient.addColorStop(0.45, "#f7fbff");
-    gradient.addColorStop(1, "#f5ffe8");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#ffffffcc";
-    ctx.fillRect(40, 40, 760, 620);
-    ctx.fillRect(840, 40, 400, 620);
+    drawStarfield(this.game.stars, 0.7);
   }
 
   drawTitle() {
-    ctx.fillStyle = "#1f1f1f";
+    ctx.fillStyle = "#fff";
     ctx.font = "bold 34px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText("Build Your Deck", 70, 70);
 
     ctx.font = "18px Arial";
-    ctx.fillStyle = "#444";
+    ctx.fillStyle = "#fff";
     ctx.fillText(
       "Choose cards from Unicorn and Rainbow, then go to battle.",
       70,
@@ -87,7 +73,7 @@ class DeckBuildingScreen {
       });
 
       if (selected) {
-        ctx.strokeStyle = "#1f1f1f";
+        ctx.strokeStyle = "#fff";
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.roundRect(
@@ -147,7 +133,7 @@ class DeckBuildingScreen {
     this.drawPageButton(this.prevPageRect, "‹", canGoPrev);
     this.drawPageButton(this.nextPageRect, "›", canGoNext);
 
-    ctx.fillStyle = "#4f4f4f";
+    ctx.fillStyle = "#fff";
     ctx.font = "16px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -160,12 +146,12 @@ class DeckBuildingScreen {
 
   drawPageButton(rect, label, enabled) {
     const hovered = enabled && pointCollision(rect, mousePosition);
-    ctx.fillStyle = enabled ? (hovered ? "#8be67b" : "#f2f2f2") : "#dddddd";
+    ctx.fillStyle = enabled ? (hovered ? "#355b76" : "#243752") : "#4c5361";
     ctx.beginPath();
     ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 14);
     ctx.fill();
 
-    ctx.fillStyle = enabled ? "#1f1f1f" : "#8a8a8a";
+    ctx.fillStyle = "#fff";
     ctx.font = "bold 22px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -173,14 +159,14 @@ class DeckBuildingScreen {
   }
 
   drawSelectedDeckPanel() {
-    ctx.fillStyle = "#1f1f1f";
+    ctx.fillStyle = "#fff";
     ctx.font = "bold 28px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText("Deck", 870, 78);
 
     ctx.font = "18px Arial";
-    ctx.fillStyle = this.selectedDeck.length === DECK_SIZE ? "#218c3a" : "#666";
+    ctx.fillStyle = "#fff";
     ctx.fillText(`${this.selectedDeck.length}/${DECK_SIZE}`, 1140, 78);
 
     const sortedDeck = [...this.selectedDeck].sort(
@@ -192,17 +178,17 @@ class DeckBuildingScreen {
       const rect = { x: 870, y, width: 330, height: 20 };
       const hovered = pointCollision(rect, mousePosition);
 
-      ctx.fillStyle = hovered ? "#dff6e3" : "#f3f3f3";
-      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-
-      ctx.fillStyle = "#1f1f1f";
-      ctx.font = "15px Arial";
+      ctx.fillStyle = hovered ? "#fff" : "#e5e9ff";
+      ctx.font = hovered ? "bold 17px Arial" : "15px Arial";
+      ctx.shadowColor = hovered ? "rgba(255, 255, 255, 0.95)" : "transparent";
+      ctx.shadowBlur = hovered ? 12 : 0;
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
       ctx.fillText(cardConfig.name, rect.x + 12, rect.y + 11);
 
       ctx.textAlign = "right";
       ctx.fillText(`${cardConfig.cost}`, rect.x + rect.width - 12, rect.y + 11);
+      ctx.shadowColor = "transparent";
     });
   }
 
@@ -377,10 +363,7 @@ class DeckBuildingScreen {
       }
     }
 
-    if (
-      this.sourceCardsPage > 0 &&
-      pointCollision(this.prevPageRect, point)
-    ) {
+    if (this.sourceCardsPage > 0 && pointCollision(this.prevPageRect, point)) {
       this.sourceCardsPage -= 1;
       return true;
     }

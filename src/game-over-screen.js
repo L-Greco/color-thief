@@ -10,8 +10,12 @@ class GameOverScreen {
   }
 
   draw() {
-    ctx.fillStyle = "#000";
+    const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    background.addColorStop(0, "#03050d");
+    background.addColorStop(1, "#171128");
+    ctx.fillStyle = background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawStarfield(this.game.stars, 0.8);
 
     ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
