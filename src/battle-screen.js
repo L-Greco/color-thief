@@ -110,7 +110,6 @@ class BattleScreen {
     this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, "Click to draw");
     this.drawDeckInfo(this.battle.player, this.playerDeckRect, "Click to draw");
     this.drawTurnPanel();
-    this.drawEnemyPreview();
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
     this.drawCards(this.battle.player.hand);
@@ -134,6 +133,8 @@ class BattleScreen {
     if (DEBUG_BORDERS) {
       drawBattleDebugBorders();
     }
+
+    this.drawEnemyPreview();
   }
 
   drawBackground() {

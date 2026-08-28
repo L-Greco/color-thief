@@ -47,7 +47,7 @@ class BattleState {
 
   showEnemyPreview(card) {
     this.enemyPreviewCard = card;
-    this.enemyPreviewTimer = this.enemyStepDelay;
+    this.enemyPreviewTimer = ENEMY_SPELL_PREVIEW_DURATION;
   }
 
   update(delta = 0) {
@@ -549,7 +549,7 @@ class BattleState {
     if (this.enemyStepTimer > 0) return;
 
     if (this.enemy.takeStep(this, this.player)) {
-      this.enemyStepTimer = this.enemyStepDelay;
+      this.enemyStepTimer = max(this.enemyStepDelay, this.enemyPreviewTimer);
       return;
     }
 
