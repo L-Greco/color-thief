@@ -3,6 +3,7 @@ class IntroScreen {
     this.game = game;
     this.titleExitProgress = 0;
     this.storyTime = 0;
+    this.thiefMusicStarted = false;
   }
 
   update(delta) {
@@ -15,6 +16,14 @@ class IntroScreen {
     }
 
     this.storyTime += delta;
+
+    if (
+      !this.thiefMusicStarted &&
+      this.storyTime >= this.getThiefStartTime()
+    ) {
+      this.thiefMusicStarted = true;
+      this.startColorThiefMusic();
+    }
   }
 
   draw() {
@@ -65,7 +74,18 @@ class IntroScreen {
   getThiefEnterProgress() {
     return min(
       1,
-      max(0, (this.storyTime - INTRO_OPENING_DURATION) / INTRO_THIEF_ENTER_DURATION),
+      max(
+        0,
+        (this.storyTime - this.getThiefStartTime()) / INTRO_THIEF_ENTER_DURATION,
+      ),
+    );
+  }
+
+  getThiefStartTime() {
+    return (
+      INTRO_FIRST_LINE_DURATION +
+      INTRO_SECOND_LINE_DURATION +
+      INTRO_THIEF_WAIT_DURATION
     );
   }
 
@@ -74,7 +94,7 @@ class IntroScreen {
       1,
       max(
         0,
-        (this.storyTime - INTRO_OPENING_DURATION - INTRO_THIEF_ENTER_DURATION) /
+        (this.storyTime - this.getThiefStartTime() - INTRO_THIEF_ENTER_DURATION) /
           INTRO_DRAIN_DURATION,
       ),
     );
@@ -82,7 +102,7 @@ class IntroScreen {
 
   getStoryFadeProgress() {
     const drainEnd =
-      INTRO_OPENING_DURATION + INTRO_THIEF_ENTER_DURATION + INTRO_DRAIN_DURATION;
+      this.getThiefStartTime() + INTRO_THIEF_ENTER_DURATION + INTRO_DRAIN_DURATION;
 
     return min(
       1,
@@ -92,7 +112,7 @@ class IntroScreen {
 
   getFinalMessageProgress() {
     const finalMessageStart =
-      INTRO_OPENING_DURATION +
+      this.getThiefStartTime() +
       INTRO_THIEF_ENTER_DURATION +
       INTRO_DRAIN_DURATION +
       INTRO_STORY_FADE_DURATION;
@@ -146,9 +166,10 @@ class IntroScreen {
   }
 
   drawStoryText() {
-    const secondLineVisible = this.getThiefEnterProgress() > 0;
     const storyFadeProgress = this.getStoryFadeProgress();
     const finalMessageProgress = this.getFinalMessageProgress();
+    const secondLineStart = INTRO_FIRST_LINE_DURATION;
+    const secondLineEnd = secondLineStart + INTRO_SECOND_LINE_DURATION;
 
     ctx.shadowColor = "rgba(230, 241, 255, 0.55)";
     ctx.shadowBlur = 14;
@@ -158,20 +179,20 @@ class IntroScreen {
     ctx.textBaseline = "middle";
     ctx.globalAlpha = 1 - storyFadeProgress;
 
-    if (storyFadeProgress < 1) {
+    if (this.storyTime < INTRO_FIRST_LINE_DURATION) {
       ctx.fillText(
         "On the planet Chroma, unicorns and rainbows lived happily and peacefully.",
         canvas.width / 2,
-        90,
+        110,
       );
+    }
 
-      if (secondLineVisible) {
-        ctx.fillText(
-          "Until the Color Thief appeared and stole their color essence!",
-          canvas.width / 2,
-          132,
-        );
-      }
+    if (this.storyTime >= secondLineStart && this.storyTime < secondLineEnd) {
+      ctx.fillText(
+        "Until the Color Thief appeared and stole their color essence!",
+        canvas.width / 2,
+        110,
+      );
     }
 
     if (finalMessageProgress > 0) {
@@ -192,6 +213,10 @@ class IntroScreen {
 
     ctx.globalAlpha = 1;
     ctx.shadowColor = "transparent";
+  }
+
+  startColorThiefMusic() {
+    // TODO: Start the Color Thief theme when its sound design is ready.
   }
 
   handleKeyDown(event) {
