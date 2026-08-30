@@ -21,8 +21,7 @@ class IntroScreen {
       !this.thiefMusicStarted &&
       this.storyTime >= this.getThiefStartTime()
     ) {
-      this.thiefMusicStarted = true;
-      this.startColorThiefMusic();
+      this.thiefMusicStarted = this.startColorThiefMusic();
     }
   }
 
@@ -209,14 +208,20 @@ class IntroScreen {
       ctx.globalAlpha = promptOpacity;
       ctx.font = "bold 20px Georgia";
       ctx.fillText("Press Enter or Space to continue", canvas.width / 2, 164);
+      ctx.font = "16px Georgia";
+      ctx.fillText("Press I for game info", canvas.width / 2, 194);
     }
 
     ctx.globalAlpha = 1;
     ctx.shadowColor = "transparent";
   }
 
+  canShowGameInfo() {
+    return this.getFinalMessageProgress() === 1;
+  }
+
   startColorThiefMusic() {
-    // TODO: Start the Color Thief theme when its sound design is ready.
+    return playColorThiefMotif();
   }
 
   handleKeyDown(event) {

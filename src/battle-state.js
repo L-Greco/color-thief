@@ -45,6 +45,26 @@ class BattleState {
     this.lastStatusAt = performance.now();
   }
 
+  isAnimating() {
+    const cards = [
+      ...this.player.hand,
+      ...this.player.board,
+      ...this.enemy.board,
+    ];
+
+    return (
+      this.turnOwner === "enemy" ||
+      this.enemyPreviewTimer > 0 ||
+      this.pendingMinionDeaths.length > 0 ||
+      cards.some(
+        (card) =>
+          card.attackEffectTime > 0 ||
+          card.hitEffectTime > 0 ||
+          card.deathEffectTime > 0,
+      )
+    );
+  }
+
   showEnemyPreview(card) {
     this.enemyPreviewCard = card;
     this.enemyPreviewTimer = ENEMY_SPELL_PREVIEW_DURATION;
@@ -537,6 +557,9 @@ class BattleState {
     if (this.ended) return;
 
     this.ended = true;
+    if (outcome === "victory") {
+      playVictoryTheme();
+    }
     if (outcome === "defeat") {
       zzfx(...DEFEAT_SOUND);
     }

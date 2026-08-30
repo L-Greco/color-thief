@@ -33,6 +33,8 @@ class StartingScreen {
     ctx.fillStyle = `rgba(255, 255, 255, ${promptOpacity})`;
     ctx.font = "bold 20px Georgia";
     ctx.fillText("Press Enter or Space to begin", 108, 466);
+    ctx.font = "16px Georgia";
+    ctx.fillText("Press I for game info", 108, 496);
   }
 
   handleKeyDown(event) {

@@ -105,6 +105,75 @@ const DEFEAT_SOUND = [
   0.02,
 ];
 
+COLOR_THIEF_PITCHES = {
+  D3: 146.83,
+  A4: 440,
+  C5: 523.25,
+  Cs5: 554.37,
+  D5: 587.33,
+  E5: 659.25,
+  F5: 698.46,
+  G5: 783.99,
+  A5: 880,
+  C6: 1046.5,
+};
+
+COLOR_THIEF_MOTIF_STEP_MS = 150;
+COLOR_THIEF_MOTIF_NOTES = [
+  "A4", "Cs5", "D5", "F5", "E5", "Cs5", "A4", "D5",
+].map((note) => COLOR_THIEF_PITCHES[note]);
+
+VICTORY_THEME_STEP_MS = 120;
+VICTORY_THEME_NOTES = ["C5", "E5", "G5", "C6", "G5", "C6"].map(
+  (note) => COLOR_THIEF_PITCHES[note],
+);
+
+playColorThiefMotifDrone = () => {
+  zzfx(0.24, 0, COLOR_THIEF_PITCHES.D3, 0.01, 0.1, 0.72, 1, 1, -1);
+};
+
+playColorThiefMotifNote = (frequency) => {
+  zzfx(0.36, 0, frequency, 0.002, 0.012, 0.18, 2, 1.2, -2);
+};
+
+playColorThiefMotif = () => {
+  ensureAudioReady();
+
+  if (!audioReady) return false;
+
+  playColorThiefMotifDrone();
+
+  COLOR_THIEF_MOTIF_NOTES.forEach((frequency, index) => {
+    setTimeout(() => {
+      if (audioReady) {
+        playColorThiefMotifNote(frequency);
+      }
+    }, index * COLOR_THIEF_MOTIF_STEP_MS);
+  });
+
+  return true;
+};
+
+playVictoryThemeNote = (frequency) => {
+  zzfx(0.32, 0, frequency, 0.002, 0.025, 0.18, 1, 1.25, 2);
+};
+
+playVictoryTheme = () => {
+  ensureAudioReady();
+
+  if (!audioReady) return false;
+
+  VICTORY_THEME_NOTES.forEach((frequency, index) => {
+    setTimeout(() => {
+      if (audioReady) {
+        playVictoryThemeNote(frequency);
+      }
+    }, index * VICTORY_THEME_STEP_MS);
+  });
+
+  return true;
+};
+
 audioReady = false;
 
 ensureAudioReady = () => {
