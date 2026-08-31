@@ -9,9 +9,11 @@ class BattleScreen {
     this.dragOffset = { x: 0, y: 0 };
     this.selectedAction = null;
     this.suppressClick = false;
+    this.knownPlayerHandCards = new Set();
   }
 
   update(delta) {
+    this.animateNewPlayerDraws();
     this.layoutHand(
       this.battle.player.hand,
       BATTLE_LAYOUT.playerHand,
@@ -27,6 +29,27 @@ class BattleScreen {
     );
     this.updateCards(this.battle.enemy.board, delta, false);
     this.updateCursor();
+  }
+
+  animateNewPlayerDraws() {
+    const playerHand = this.battle.player.hand;
+    const newCards = playerHand.filter(
+      (card) => !this.knownPlayerHandCards.has(card),
+    );
+    const startX =
+      this.playerDeckRect.x + (this.playerDeckRect.width - CARD_WIDTH) / 2;
+    const startY =
+      this.playerDeckRect.y + (this.playerDeckRect.height - CARD_HEIGHT) / 2;
+
+    newCards.forEach((card, index) => {
+      card.triggerDrawEffect(
+        startX,
+        startY,
+        index * CARD_DRAW_EFFECT_STAGGER,
+      );
+    });
+
+    this.knownPlayerHandCards = new Set(playerHand);
   }
 
   createDeckRect(zone) {
@@ -598,7 +621,7 @@ class BattleScreen {
   }
 
   canDragHandCard(card) {
-    return !!card && this.battle.isPlayerTurn();
+    return !!card && !card.isDrawing() && this.battle.isPlayerTurn();
   }
 
   canStartCardTargetSelection(card) {

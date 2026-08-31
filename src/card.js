@@ -18,6 +18,12 @@ class Card {
   deathRise = 0;
   deathOverlayAlpha = 0;
   drawAlpha = 1;
+  drawEffectTime = 0;
+  drawEffectDelay = 0;
+  drawStartX = 0;
+  drawStartY = 0;
+  drawTargetX = null;
+  drawTargetY = null;
   isDying = false;
   isTargetSource = false;
 
@@ -55,6 +61,12 @@ class Card {
   }
 
   setPosition(x, y) {
+    if (this.isDrawing()) {
+      this.drawTargetX = x;
+      this.drawTargetY = y;
+      return;
+    }
+
     this.x = x;
     this.y = y;
   }
@@ -96,6 +108,23 @@ class Card {
 
     this.attackDirectionX = dx / distance;
     this.attackDirectionY = dy / distance;
+  }
+
+  triggerDrawEffect(startX, startY, delay = 0) {
+    this.drawEffectTime = CARD_DRAW_EFFECT_DURATION;
+    this.drawEffectDelay = delay;
+    this.drawStartX = startX;
+    this.drawStartY = startY;
+    this.drawTargetX = null;
+    this.drawTargetY = null;
+    this.x = startX;
+    this.y = startY;
+    this.hovered = false;
+    this.hoverProgress = 0;
+  }
+
+  isDrawing() {
+    return this.drawEffectTime > 0 || this.drawEffectDelay > 0;
   }
 
   triggerDeathEffect() {
@@ -151,6 +180,30 @@ class Card {
       this.drawAlpha = 1 - easeIn(progress);
       this.hitRotation = 0;
       this.hitOverlayAlpha = 0;
+      return;
+    }
+
+    if (this.drawEffectDelay > 0) {
+      this.drawEffectDelay = max(0, this.drawEffectDelay - delta);
+      this.scale = CARD_DRAW_EFFECT_START_SCALE;
+      this.drawAlpha = 0;
+      return;
+    }
+
+    if (
+      this.drawEffectTime > 0 &&
+      this.drawTargetX !== null &&
+      this.drawTargetY !== null
+    ) {
+      this.drawEffectTime = max(0, this.drawEffectTime - delta);
+
+      const progress = 1 - this.drawEffectTime / CARD_DRAW_EFFECT_DURATION;
+      const easedProgress = easeOut(progress);
+
+      this.x = lerp(this.drawStartX, this.drawTargetX, easedProgress);
+      this.y = lerp(this.drawStartY, this.drawTargetY, easedProgress);
+      this.scale = lerp(CARD_DRAW_EFFECT_START_SCALE, 1, easedProgress);
+      this.drawAlpha = lerp(0.35, 1, easedProgress);
       return;
     }
 

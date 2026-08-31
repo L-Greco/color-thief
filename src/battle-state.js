@@ -58,6 +58,7 @@ class BattleState {
       this.pendingMinionDeaths.length > 0 ||
       cards.some(
         (card) =>
+          card.isDrawing() ||
           card.attackEffectTime > 0 ||
           card.hitEffectTime > 0 ||
           card.deathEffectTime > 0,
