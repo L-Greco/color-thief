@@ -2,7 +2,10 @@ class DeckBuildingScreen {
   constructor(game) {
     this.game = game;
     this.selectedSource = playerDeckSources[0];
-    this.selectedDeck = [];
+    this.selectedDeck =
+      typeof debugConfig === "undefined" || !debugConfig.playerDeckConfig
+        ? []
+        : [...debugConfig.playerDeckConfig];
     this.sourceDeckButtons = this.createSourceDeckButtons();
     this.sourceCardsPage = 0;
     this.cardsPerPage = 10;

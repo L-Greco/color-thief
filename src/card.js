@@ -210,7 +210,6 @@ class Card {
 
     const palette = this.getPalette();
     const artRect = this.getArtRect();
-    console.log(artRect);
     const effectRect = this.getEffectRect();
 
     if (this.isTargetSource) {
