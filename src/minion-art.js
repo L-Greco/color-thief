@@ -1,3 +1,16 @@
+createMinionGradient = (spX, spY, startColor, endColor) => {
+  const gradient = ctx.createLinearGradient(
+    spX - 30,
+    spY + 29,
+    spX + 30,
+    spY - 30,
+  );
+  gradient.addColorStop(0, "#ffffff");
+  gradient.addColorStop(1, "#6e6e6e");
+  // gradient.addColorStop(1, endColor);
+  return gradient;
+};
+
 class UnicornMinionArt {
   draw(rect, options = {}) {
     const sourceWidth = 64;
@@ -25,7 +38,9 @@ class UnicornMinionArt {
   drawUnicorn(isUnique) {
     const spX = 25;
     const spY = 48;
-    const unicornColor = isUnique ? this.createUniqueGradient(spX, spY) : "#fff";
+    const unicornColor = isUnique
+      ? this.createUniqueGradient(spX, spY)
+      : createMinionGradient(spX, spY, "#d4d8dc", "#fce8ae");
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -170,7 +185,7 @@ class RainbowFairyMinionArt {
     ctx.scale(scale, scale);
     ctx.translate(-spX, -spY);
 
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = createMinionGradient(spX, spY, "#ffffff", "#6e6e6e");
     ctx.beginPath();
     ctx.moveTo(spX, spY);
     ctx.bezierCurveTo(
@@ -292,7 +307,7 @@ class EnemyMinionArt {
     ctx.scale(scale, scale);
     ctx.translate(-spX, -spY);
 
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = createMinionGradient(spX, spY, "#fa5efb", "#31114c");
     ctx.beginPath();
     ctx.moveTo(spX + 16.32, spY - 8.93);
     ctx.quadraticCurveTo(spX + 16.61, spY - 10.69, spX + 15.29, spY - 12.45);
