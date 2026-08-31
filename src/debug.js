@@ -1,5 +1,6 @@
 // Development-only configuration. Remove this script from index.html before shipping.
 debugConfig = {
+  allowManualDeckDraw: true,
   playerDeckConfig: [
     unicornCards[0], // Tiny Hoof
     unicornCards[0],

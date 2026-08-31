@@ -74,11 +74,21 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  if (e.code === "KeyD" && game.battle) {
+  if (
+    typeof debugConfig !== "undefined" &&
+    debugConfig.allowManualDeckDraw &&
+    e.code === "KeyD" &&
+    game.battle
+  ) {
     game.battle.drawCardForPlayer();
   }
 
-  if (e.code === "KeyE" && game.battle) {
+  if (
+    typeof debugConfig !== "undefined" &&
+    debugConfig.allowManualDeckDraw &&
+    e.code === "KeyE" &&
+    game.battle
+  ) {
     game.battle.drawCardForEnemy();
   }
 });

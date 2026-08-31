@@ -107,8 +107,9 @@ class BattleScreen {
       BATTLE_LAYOUT.playerStatus,
       "Player",
     );
-    this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, "Click to draw");
-    this.drawDeckInfo(this.battle.player, this.playerDeckRect, "Click to draw");
+    const deckHint = this.canManuallyDrawFromDeck() ? "Click to draw" : "";
+    this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, deckHint);
+    this.drawDeckInfo(this.battle.player, this.playerDeckRect, deckHint);
     this.drawTurnPanel();
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
@@ -190,8 +191,10 @@ class BattleScreen {
     ctx.textBaseline = "middle";
     ctx.fillText("Deck", x + width / 2, y + 40);
     ctx.fillText(player.deck.length, x + width / 2, y + 80);
-    ctx.font = "12px Arial";
-    ctx.fillText(hint, x + width / 2, y + 118);
+    if (hint) {
+      ctx.font = "12px Arial";
+      ctx.fillText(hint, x + width / 2, y + 118);
+    }
   }
 
   drawCards(cards) {
@@ -406,12 +409,18 @@ class BattleScreen {
       return this.handleTargetModeClick(point);
     }
 
-    if (pointCollision(this.playerDeckRect, point)) {
+    if (
+      this.canManuallyDrawFromDeck() &&
+      pointCollision(this.playerDeckRect, point)
+    ) {
       this.battle.drawCardForPlayer();
       return true;
     }
 
-    if (pointCollision(this.enemyDeckRect, point)) {
+    if (
+      this.canManuallyDrawFromDeck() &&
+      pointCollision(this.enemyDeckRect, point)
+    ) {
       this.battle.drawCardForEnemy();
       return true;
     }
@@ -604,6 +613,12 @@ class BattleScreen {
 
   canInteractWithHandCard(card) {
     return this.canDragHandCard(card) || this.canStartCardTargetSelection(card);
+  }
+
+  canManuallyDrawFromDeck() {
+    return (
+      typeof debugConfig !== "undefined" && debugConfig.allowManualDeckDraw
+    );
   }
 
   getActionTargets() {
