@@ -9,6 +9,7 @@ class BattleState {
   enemyPreviewCard = null;
   enemyPreviewTimer = 0;
   pendingMinionDeaths = [];
+  mulliganActive = false;
 
   constructor(game, player, enemy, playerDeckConfig) {
     this.game = game;
@@ -33,11 +34,36 @@ class BattleState {
     this.enemy.resetBattleState();
     this.player.drawCards(STARTING_HAND_SIZE);
     this.enemy.drawCards(STARTING_HAND_SIZE);
+    this.mulliganActive = true;
     this.setStatus("Player turn");
   }
 
   isPlayerTurn() {
     return this.turnOwner === "player";
+  }
+
+  isMulliganActive() {
+    return this.mulliganActive;
+  }
+
+  completeMulligan(selectedCards) {
+    if (!this.mulliganActive) return false;
+
+    const cardsToReplace = this.player.hand.filter((card) =>
+      selectedCards.includes(card),
+    );
+
+    this.player.hand = this.player.hand.filter(
+      (card) => !cardsToReplace.includes(card),
+    );
+    this.player.drawCards(cardsToReplace.length);
+    this.player.deck.push(...cardsToReplace);
+    shuffle(this.player.deck);
+    this.mulliganActive = false;
+    this.setStatus(
+      cardsToReplace.length ? "Mulligan complete" : "Opening hand kept",
+    );
+    return true;
   }
 
   setStatus(message) {
@@ -102,6 +128,7 @@ class BattleState {
 
   drawCardForPlayer() {
     if (this.ended) return;
+    if (this.mulliganActive) return;
     if (!this.isPlayerTurn()) {
       this.setStatus("You can only draw on your turn");
       return;
@@ -121,6 +148,7 @@ class BattleState {
 
   drawCardForEnemy() {
     if (this.ended) return;
+    if (this.mulliganActive) return;
     const card = this.enemy.drawCard();
 
     if (card) {
@@ -135,6 +163,9 @@ class BattleState {
 
   canUseCard(player, opponent, card) {
     if (this.ended) return { ok: false, reason: "Battle is over" };
+    if (this.mulliganActive) {
+      return { ok: false, reason: "Complete the mulligan first" };
+    }
     if (!card) return { ok: false, reason: "No card selected" };
     if (card.cost > player.mana) {
       return { ok: false, reason: "Not enough mana" };
@@ -482,6 +513,7 @@ class BattleState {
 
   endTurn() {
     if (this.ended) return;
+    if (this.mulliganActive) return;
     if (!this.isPlayerTurn()) return;
 
     this.turnOwner = "enemy";
@@ -521,6 +553,9 @@ class BattleState {
   canMinionAttack(player, minion) {
     if (this.ended) {
       return { ok: false, reason: "Battle is over" };
+    }
+    if (this.mulliganActive) {
+      return { ok: false, reason: "Complete the mulligan first" };
     }
     if (!minion || minion.type !== "minion") {
       return { ok: false, reason: "Only minions can attack" };

@@ -4,8 +4,8 @@ const GAME_INFO_RULES = [
     "Choose 20 cards from the Unicorn and Rainbow collections before battle.",
   ],
   [
-    "Draw and manage your hand",
-    "Start with 4 cards. Your hand can hold up to 7 cards.",
+    "Mulligan and hand",
+    "Start with 4 cards. Before turn one, you may replace any of them. Your hand can hold up to 7 cards.",
   ],
   [
     "Grow your mana",

@@ -10,6 +10,10 @@ class BattleScreen {
     this.selectedAction = null;
     this.suppressClick = false;
     this.knownPlayerHandCards = new Set();
+    this.mulliganCards = new Set();
+    this.mulliganKeepRect = { x: 410, y: 152, width: 180, height: 42 };
+    this.mulliganRedrawRect = { x: 690, y: 152, width: 180, height: 42 };
+    this.animateNewPlayerDraws();
   }
 
   update(delta) {
@@ -42,11 +46,7 @@ class BattleScreen {
       this.playerDeckRect.y + (this.playerDeckRect.height - CARD_HEIGHT) / 2;
 
     newCards.forEach((card, index) => {
-      card.triggerDrawEffect(
-        startX,
-        startY,
-        index * CARD_DRAW_EFFECT_STAGGER,
-      );
+      card.triggerDrawEffect(startX, startY, index * CARD_DRAW_EFFECT_STAGGER);
     });
 
     this.knownPlayerHandCards = new Set(playerHand);
@@ -138,7 +138,12 @@ class BattleScreen {
     this.drawCards(this.battle.player.board);
     this.drawCards(this.battle.player.hand);
     this.drawTargetMode();
-    this.drawDebugHelp();
+
+    if (this.battle.isMulliganActive()) {
+      this.drawMulligan();
+    } else {
+      this.drawDebugHelp();
+    }
 
     if (!this.battle.enemy.board.length) {
       this.drawBoardHint(
@@ -222,6 +227,108 @@ class BattleScreen {
 
   drawCards(cards) {
     cards.forEach((card) => ctx.wrap(() => card.draw()));
+  }
+
+  drawMulligan() {
+    const ready = this.isMulliganReady();
+    const panel = { x: 280, y: 76, width: 720, height: 138 };
+
+    this.mulliganCards.forEach((card) =>
+      ctx.wrap(() => this.drawMulliganCardSelection(card)),
+    );
+
+    ctx.wrap(() => {
+      ctx.fillStyle = "rgba(10, 18, 43)";
+      ctx.beginPath();
+      ctx.roundRect(panel.x, panel.y, panel.width, panel.height, 22);
+      ctx.fill();
+
+      ctx.strokeStyle = "#f3d56d";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#f8f6e9";
+      ctx.font = "bold 26px Georgia";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("MULLIGAN", canvas.width / 2, 108);
+
+      ctx.fillStyle = "#dbe7ff";
+      ctx.font = "16px Arial";
+      ctx.fillText(
+        ready
+          ? "Select cards to replace, then confirm your opening hand."
+          : "Drawing your opening hand...",
+        canvas.width / 2,
+        132,
+      );
+    });
+
+    this.drawMulliganButton(this.mulliganKeepRect, "Keep hand", ready);
+    this.drawMulliganButton(
+      this.mulliganRedrawRect,
+      `Redraw ${this.mulliganCards.size}`,
+      ready && this.mulliganCards.size > 0,
+    );
+  }
+
+  drawMulliganCardSelection(card) {
+    if (!this.battle.player.hand.includes(card)) return;
+
+    ctx.fillStyle = "rgba(243, 213, 109, 0.24)";
+    ctx.beginPath();
+    ctx.roundRect(
+      card.x - 5,
+      card.y - 5,
+      card.width + 10,
+      card.height + 10,
+      12,
+    );
+    ctx.fill();
+    ctx.strokeStyle = "#f3d56d";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  }
+
+  drawMulliganButton(rect, label, enabled) {
+    const hovered = enabled && pointCollision(rect, mousePosition);
+    const gradient = ctx.createLinearGradient(
+      rect.x,
+      rect.y,
+      rect.x,
+      rect.y + rect.height,
+    );
+
+    if (enabled) {
+      gradient.addColorStop(0, hovered ? "#4f729c" : "#355b76");
+      gradient.addColorStop(1, "#243752");
+    } else {
+      gradient.addColorStop(0, "#5a6270");
+      gradient.addColorStop(1, "#424852");
+    }
+
+    ctx.wrap(() => {
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 18);
+      ctx.fill();
+      ctx.strokeStyle = enabled ? "#a9d9ff" : "#737985";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 17px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        label,
+        rect.x + rect.width / 2,
+        rect.y + rect.height / 2 + 1,
+      );
+    });
+  }
+
+  isMulliganReady() {
+    return this.battle.isMulliganActive() && !this.battle.isAnimating();
   }
 
   drawEnemyPreview() {
@@ -374,7 +481,8 @@ class BattleScreen {
 
   drawEndTurnButton() {
     const { x, y, width, height } = this.endTurnRect;
-    const enabled = this.battle.isPlayerTurn();
+    const enabled =
+      this.battle.isPlayerTurn() && !this.battle.isMulliganActive();
     const hovered = pointCollision(this.endTurnRect, mousePosition);
     const pressed = enabled && this.endTurnPressed;
     const offsetY = pressed ? 4 : 0;
@@ -421,6 +529,10 @@ class BattleScreen {
   }
 
   handleClick(point) {
+    if (this.battle.isMulliganActive()) {
+      return this.handleMulliganClick(point);
+    }
+
     if (this.suppressClick) {
       this.suppressClick = false;
       return true;
@@ -473,6 +585,40 @@ class BattleScreen {
     return false;
   }
 
+  handleMulliganClick(point) {
+    if (!this.isMulliganReady()) return true;
+
+    if (pointCollision(this.mulliganKeepRect, point)) {
+      this.completeMulligan();
+      return true;
+    }
+
+    if (
+      this.mulliganCards.size > 0 &&
+      pointCollision(this.mulliganRedrawRect, point)
+    ) {
+      this.completeMulligan();
+      return true;
+    }
+
+    const card = this.findHoveredHandCard(point);
+
+    if (!card) return true;
+
+    if (this.mulliganCards.has(card)) {
+      this.mulliganCards.delete(card);
+    } else {
+      this.mulliganCards.add(card);
+    }
+
+    return true;
+  }
+
+  completeMulligan() {
+    this.battle.completeMulligan([...this.mulliganCards]);
+    this.mulliganCards.clear();
+  }
+
   handleTargetModeClick(point) {
     const action = this.selectedAction;
 
@@ -518,6 +664,8 @@ class BattleScreen {
   }
 
   handlePointerDown(point) {
+    if (this.battle.isMulliganActive()) return true;
+
     if (this.battle.isPlayerTurn() && pointCollision(this.endTurnRect, point)) {
       this.endTurnPressed = true;
       canvas.style.cursor = "pointer";
@@ -552,6 +700,8 @@ class BattleScreen {
   }
 
   handlePointerUp(point) {
+    if (this.battle.isMulliganActive()) return true;
+
     if (this.endTurnPressed) {
       this.endTurnPressed = false;
 
@@ -621,7 +771,12 @@ class BattleScreen {
   }
 
   canDragHandCard(card) {
-    return !!card && !card.isDrawing() && this.battle.isPlayerTurn();
+    return (
+      !!card &&
+      !card.isDrawing() &&
+      !this.battle.isMulliganActive() &&
+      this.battle.isPlayerTurn()
+    );
   }
 
   canStartCardTargetSelection(card) {
@@ -699,6 +854,11 @@ class BattleScreen {
       return;
     }
 
+    if (this.battle.isMulliganActive()) {
+      this.updateMulliganCursor();
+      return;
+    }
+
     if (this.selectedAction) {
       canvas.style.cursor = this.findActionTarget(mousePosition)
         ? "pointer"
@@ -717,6 +877,27 @@ class BattleScreen {
     if (
       (hoveredHandCard && this.canInteractWithHandCard(hoveredHandCard)) ||
       (hoveredBoardMinion && this.canStartAttackSelection(hoveredBoardMinion))
+    ) {
+      canvas.style.cursor = "pointer";
+      return;
+    }
+
+    canvas.style.cursor = "default";
+  }
+
+  updateMulliganCursor() {
+    if (!this.isMulliganReady()) {
+      canvas.style.cursor = "default";
+      return;
+    }
+
+    const redrawEnabled = this.mulliganCards.size > 0;
+
+    if (
+      pointCollision(this.mulliganKeepRect, mousePosition) ||
+      (redrawEnabled &&
+        pointCollision(this.mulliganRedrawRect, mousePosition)) ||
+      this.findHoveredHandCard()
     ) {
       canvas.style.cursor = "pointer";
       return;
