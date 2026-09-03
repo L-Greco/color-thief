@@ -151,12 +151,12 @@ class BattleScreen {
       this.playerHeroRect,
       "player",
     );
-    this.drawTurnPanel();
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
     this.drawCards(this.battle.player.hand);
     this.drawDeckBack(this.enemyDeckRect, "colorThief");
     this.drawDeckBack(this.playerDeckRect, "player");
+    this.drawTurnPanel();
     this.drawTargetMode();
 
     if (this.battle.isMulliganActive()) {
@@ -174,7 +174,6 @@ class BattleScreen {
     ctx.fillStyle = "#05070f";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawStarfield(this.battle.game.stars, 0.6);
-    this.drawPlayZone(BATTLE_LAYOUT.enemyBoard, "rgba(204, 113, 255, 0.5)");
     this.drawPlayZone(BATTLE_LAYOUT.playerBoard, "rgba(110, 220, 255, 0.5)");
   }
 
@@ -514,7 +513,7 @@ class BattleScreen {
     });
   }
 
-  drawPreviewText(text, x, y, maxWidth, lineHeight) {
+  drawPreviewText(text, x, y, maxWidth, lineHeight, maxLines = 3) {
     const words = text.split(" ");
     const lines = [];
     let currentLine = "";
@@ -535,7 +534,7 @@ class BattleScreen {
       lines.push(currentLine);
     }
 
-    lines.slice(0, 3).forEach((line, index) => {
+    lines.slice(0, maxLines).forEach((line, index) => {
       ctx.fillText(line, x, y + index * lineHeight);
     });
   }
@@ -599,14 +598,122 @@ class BattleScreen {
   }
 
   drawTurnPanel() {
-    ctx.fillStyle = "#222";
-    ctx.font = "18px Arial";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#444";
-    ctx.fillText(this.getTurnMessage(), 60, 122);
+    const rect = { x: 28, y: 76, width: 224, height: 88 };
+    const state = this.getTurnPanelState();
+
+    ctx.wrap(() => {
+      const fill = ctx.createLinearGradient(
+        rect.x,
+        rect.y,
+        rect.x,
+        rect.y + rect.height,
+      );
+      fill.addColorStop(0, "#15223b");
+      fill.addColorStop(1, "#080d1b");
+
+      ctx.shadowColor = state.glow;
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 5;
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 16);
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+
+      ctx.strokeStyle = state.accent;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.7;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = state.accent;
+      ctx.fillRect(rect.x + 14, rect.y + 18, 4, rect.height - 36);
+
+      ctx.shadowColor = state.glow;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(rect.x + 36, rect.y + 32, 8, 0, PI * 2);
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.strokeStyle = state.accent;
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath();
+      ctx.arc(rect.x + 36, rect.y + 32, 13, 0, PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = "#f4f7ff";
+      ctx.font = "bold 14px Arial";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(state.label, rect.x + 56, rect.y + 32);
+
+      ctx.fillStyle = state.accent;
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      ctx.roundRect(rect.x + 172, rect.y + 19, 36, 22, 10);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.font = "bold 11px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`T${this.battle.turn}`, rect.x + 190, rect.y + 31);
+
+      ctx.fillStyle = "#cbd7ef";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "left";
+      this.drawPreviewText(
+        state.message,
+        rect.x + 28,
+        rect.y + 59,
+        rect.width - 42,
+        17,
+        2,
+      );
+    });
 
     this.drawEndTurnButton();
+  }
+
+  getTurnPanelState() {
+    if (this.battle.isMulliganActive()) {
+      return {
+        label: "MULLIGAN",
+        message: "Choose cards to redraw or keep your opening hand.",
+        accent: "#f3d56d",
+        glow: "rgba(243, 213, 109, 0.55)",
+      };
+    }
+
+    if (this.selectedAction) {
+      return {
+        label: "CHOOSE TARGET",
+        message: this.getTurnMessage(),
+        accent: "#ffc76b",
+        glow: "rgba(255, 184, 82, 0.6)",
+      };
+    }
+
+    if (this.battle.isPlayerTurn()) {
+      return {
+        label: "YOUR TURN",
+        message:
+          this.battle.statusMessage === "Player turn"
+            ? "Play a card or choose a minion to attack."
+            : this.battle.statusMessage || "Choose your next move.",
+        accent: "#6de7ff",
+        glow: "rgba(85, 221, 255, 0.58)",
+      };
+    }
+
+    return {
+      label: "THIEF'S TURN",
+      message:
+        this.battle.statusMessage === "Enemy turn"
+          ? "The Color Thief is making a move."
+          : this.battle.statusMessage || "The Color Thief is making a move.",
+      accent: "#ef82d7",
+      glow: "rgba(239, 90, 205, 0.58)",
+    };
   }
 
   getTurnMessage() {

@@ -13,7 +13,7 @@ const GAME_INFO_RULES = [
   ],
   [
     "Play cards",
-    "Spend mana to play minions and spells. Some spells need a target.",
+    "Drag a card onto the highlighted player zone to play it. For target cards, click the card, then left-click its target.",
   ],
   [
     "Attack wisely",

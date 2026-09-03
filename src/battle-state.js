@@ -153,7 +153,7 @@ class BattleState {
 
     if (card) {
       zzfx(...CARD_DRAW_SOUND);
-      this.setStatus("Enemy drew a card");
+      this.setStatus("Enemy draw Phase");
     } else if (!this.enemy.canDrawCard()) {
       this.setStatus("Enemy hand is full");
     } else {
@@ -485,7 +485,10 @@ class BattleState {
 
     zzfx(...MINION_ATTACK_SOUND);
     attacker.exhaust();
-    attacker.triggerAttackEffect(canvas.width / 2, defender === this.player ? 690 : 30);
+    attacker.triggerAttackEffect(
+      canvas.width / 2,
+      defender === this.player ? 690 : 30,
+    );
     defender.takeDamage(attacker.attack || 0);
     if (this.checkGameOver()) return true;
     this.setStatus(`${attacker.name} attacked ${defender.name}`);

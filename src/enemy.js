@@ -35,13 +35,13 @@ class Enemy extends Player {
 
       if (!card) {
         this.turnPhase = "attack";
-        battle.setStatus("Enemy prepares to attack");
+        battle.setStatus("Enemy attack Phase");
         return true;
       }
 
       if (!battle.playEnemyCard(this, opponent, card, target)) {
         this.turnPhase = "attack";
-        battle.setStatus("Enemy prepares to attack");
+        battle.setStatus("Enemy attack Phase");
         return true;
       }
 
