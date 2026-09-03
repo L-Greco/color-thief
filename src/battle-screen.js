@@ -598,7 +598,7 @@ class BattleScreen {
   }
 
   drawTurnPanel() {
-    const rect = { x: 28, y: 76, width: 224, height: 88 };
+    const rect = { x: 28, y: 76, width: 224, height: 96 };
     const state = this.getTurnPanelState();
 
     ctx.wrap(() => {
@@ -638,7 +638,7 @@ class BattleScreen {
       ctx.strokeStyle = state.accent;
       ctx.globalAlpha = 0.4;
       ctx.beginPath();
-      ctx.arc(rect.x + 36, rect.y + 32, 13, 0, PI * 2);
+      ctx.arc(rect.x + 36, rect.y + 32, 10, 0, PI * 2);
       ctx.stroke();
       ctx.globalAlpha = 1;
 
