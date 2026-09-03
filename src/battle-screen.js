@@ -56,10 +56,10 @@ class BattleScreen {
 
   createDeckRect(zone) {
     return {
-      x: zone[0] + zone[2] - 140,
-      y: zone[1] + (zone[3] - 150) / 2,
-      width: 110,
-      height: 150,
+      x: zone[0] + zone[2] - CARD_WIDTH - 30,
+      y: zone[1] + (zone[3] - CARD_HEIGHT) / 2,
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT,
     };
   }
 
@@ -151,9 +151,8 @@ class BattleScreen {
       this.playerHeroRect,
       "player",
     );
-    const deckHint = this.canManuallyDrawFromDeck() ? "Click to draw" : "";
-    this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, deckHint);
-    this.drawDeckInfo(this.battle.player, this.playerDeckRect, deckHint);
+    this.drawDeckBack(this.enemyDeckRect, "colorThief");
+    this.drawDeckBack(this.playerDeckRect, "player");
     this.drawTurnPanel();
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
@@ -281,24 +280,85 @@ class BattleScreen {
     ctx.fillText(player.health, healthX, healthY + 20);
   }
 
-  drawDeckInfo(player, rect, hint) {
+  drawDeckBack(rect, owner) {
     const { x, y, width, height } = rect;
+    const isColorThief = owner === "colorThief";
+    const outerColor = isColorThief ? "#040409" : "#062a45";
+    const borderColor = isColorThief ? "#713187" : "#2ea7c8";
+    const accentColor = isColorThief ? "#25102e" : "#0d5874";
+    const iconCenterColor = isColorThief ? "#6a187c" : "#147596";
+    const iconEdgeColor = isColorThief ? "#13091a" : "#063044";
+    const iconCenters = isColorThief
+      ? [
+          { x: x + 28, y: y + 28 },
+          { x: x + 92, y: y + 140 },
+        ]
+      : [
+          { x: x + 28, y: y + 28 },
+          { x: x + 92, y: y + 140 },
+        ];
+    const background = ctx.createLinearGradient(x, y, x + width, y + height);
 
-    ctx.fillStyle = "#3a3a3a";
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeStyle = "#111";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(x, y, width, height);
-    ctx.fillStyle = "#fff";
-    ctx.font = "22px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Deck", x + width / 2, y + 40);
-    ctx.fillText(player.deck.length, x + width / 2, y + 80);
-    if (hint) {
-      ctx.font = "12px Arial";
-      ctx.fillText(hint, x + width / 2, y + 118);
-    }
+    background.addColorStop(0, outerColor);
+    background.addColorStop(0.5, accentColor);
+    background.addColorStop(1, outerColor);
+
+    ctx.wrap(() => {
+      ctx.fillStyle = "#090b13";
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 9);
+      ctx.fill();
+
+      ctx.fillStyle = background;
+      ctx.beginPath();
+      ctx.roundRect(x + 6, y + 6, width - 12, height - 12, 6);
+      ctx.fill();
+
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      iconCenters.forEach((center) => {
+        const iconBackground = ctx.createRadialGradient(
+          center.x - 5,
+          center.y - 5,
+          3,
+          center.x,
+          center.y,
+          21,
+        );
+        iconBackground.addColorStop(0, iconCenterColor);
+        iconBackground.addColorStop(1, iconEdgeColor);
+        ctx.fillStyle = iconBackground;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, 21, 0, PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      if (isColorThief) {
+        drawColorThief(x + 4, y - 13, 0.65, 1);
+        drawMinionArt(
+          "enemy",
+          { x: x + 74, y: y + 115, width: 34, height: 48 },
+          { transparentBackground: true },
+        );
+        return;
+      }
+
+      drawMinionArt(
+        "unicorn",
+        { x: x + 4, y: y + 1, width: 40, height: 54 },
+        { transparentBackground: true },
+      );
+      drawMinionArt(
+        "rainbow",
+        { x: x + 73, y: y + 117, width: 36, height: 48 },
+        { transparentBackground: true },
+      );
+    });
   }
 
   drawCards(cards) {

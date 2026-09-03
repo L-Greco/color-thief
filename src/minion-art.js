@@ -278,7 +278,7 @@ class RainbowFairyMinionArt {
 }
 
 class EnemyMinionArt {
-  draw(rect) {
+  draw(rect, options = {}) {
     const sourceWidth = 64;
     const sourceHeight = 96;
     const scale = Math.min(
@@ -290,8 +290,10 @@ class EnemyMinionArt {
     const x = rect.x + (rect.width - width) / 2;
     const y = rect.y + (rect.height - height) / 2;
 
-    ctx.fillStyle = "#000";
-    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    if (!options.transparentBackground) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    }
 
     ctx.save();
     // The source art keeps the editor's bottom-right coordinate system.
@@ -311,7 +313,7 @@ class EnemyMinionArt {
     ctx.scale(scale, scale);
     ctx.translate(-spX, -spY);
 
-    ctx.fillStyle = createMinionGradient(spX, spY, "#fa5efb", "#31114c");
+    ctx.fillStyle = this.createEnemyGradient(spX, spY);
     ctx.beginPath();
     ctx.moveTo(spX + 16.32, spY - 8.93);
     ctx.quadraticCurveTo(spX + 16.61, spY - 10.69, spX + 15.29, spY - 12.45);
@@ -344,6 +346,19 @@ class EnemyMinionArt {
     this.drawEye(spX, spY, 0, true);
     this.drawEye(spX, spY, 22, false);
     ctx.restore();
+  }
+
+  createEnemyGradient(spX, spY) {
+    const gradient = ctx.createLinearGradient(
+      spX - 30,
+      spY + 29,
+      spX + 30,
+      spY - 30,
+    );
+    gradient.addColorStop(0, "#321047");
+    gradient.addColorStop(0.52, "#d84fee");
+    gradient.addColorStop(1, "#6a187c");
+    return gradient;
   }
 
   drawEye(spX, spY, offsetX, mirrored) {
