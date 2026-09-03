@@ -3,6 +3,8 @@ class BattleScreen {
     this.battle = battle;
     this.enemyDeckRect = this.createDeckRect(BATTLE_LAYOUT.enemyBoard);
     this.playerDeckRect = this.createDeckRect(BATTLE_LAYOUT.playerHand);
+    this.enemyHeroRect = this.createHeroRect(BATTLE_LAYOUT.enemyStatus);
+    this.playerHeroRect = this.createHeroRect(BATTLE_LAYOUT.playerStatus);
     this.endTurnRect = this.createEndTurnRect(BATTLE_LAYOUT.playerBoard);
     this.endTurnPressed = false;
     this.dragCard = null;
@@ -70,6 +72,19 @@ class BattleScreen {
     };
   }
 
+  createHeroRect(zone) {
+    const isPlayerStatus = zone[1] > canvas.height / 2;
+    const width = 360;
+    const height = 88;
+
+    return {
+      x: canvas.width / 2 - width / 2,
+      y: isPlayerStatus ? zone[1] - 32 : zone[1] - 14,
+      width,
+      height,
+    };
+  }
+
   layoutHand(cards, zone, deckRect) {
     if (!cards.length) return;
 
@@ -124,11 +139,17 @@ class BattleScreen {
 
   draw() {
     this.drawBackground();
-    this.drawStatusRow(this.battle.enemy, BATTLE_LAYOUT.enemyStatus, "Enemy");
+    this.drawStatusRow(
+      this.battle.enemy,
+      BATTLE_LAYOUT.enemyStatus,
+      this.enemyHeroRect,
+      "colorThief",
+    );
     this.drawStatusRow(
       this.battle.player,
       BATTLE_LAYOUT.playerStatus,
-      "Player",
+      this.playerHeroRect,
+      "player",
     );
     const deckHint = this.canManuallyDrawFromDeck() ? "Click to draw" : "";
     this.drawDeckInfo(this.battle.enemy, this.enemyDeckRect, deckHint);
@@ -151,42 +172,113 @@ class BattleScreen {
   }
 
   drawBackground() {
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#080d20");
-    gradient.addColorStop(0.5, "#172244");
-    gradient.addColorStop(1, "#331d3d");
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = "#05070f";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawStarfield(this.battle.game.stars, 0.6);
-    this.fillZone(BATTLE_LAYOUT.enemyBoard, "#f8fbffdf");
-    this.fillZone(BATTLE_LAYOUT.playerBoard, "#fffdf8df");
-    this.fillZone(BATTLE_LAYOUT.playerHand, "#fff8fcdf");
-    this.fillZone(BATTLE_LAYOUT.enemyStatus, "#ffffffd0");
-    this.fillZone(BATTLE_LAYOUT.playerStatus, "#ffffffd0");
+    this.drawPlayZone(BATTLE_LAYOUT.enemyBoard, "rgba(204, 113, 255, 0.5)");
+    this.drawPlayZone(BATTLE_LAYOUT.playerBoard, "rgba(110, 220, 255, 0.5)");
   }
 
-  fillZone(zone, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(zone[0], zone[1], zone[2], zone[3]);
+  drawPlayZone(zone, color) {
+    const inset = 18;
+
+    ctx.wrap(() => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([12, 10]);
+      ctx.beginPath();
+      ctx.roundRect(
+        zone[0] + inset,
+        zone[1] + inset / 2,
+        zone[2] - inset * 2,
+        zone[3] - inset,
+        20,
+      );
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
   }
 
-  drawStatusRow(player, zone, label) {
+  drawStatusRow(player, zone, heroRect, heroType) {
     const centerY = zone[1] + zone[3] / 2;
 
-    ctx.fillStyle = "#222";
-    ctx.font = "20px Arial";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillText(label, 40, centerY);
-    ctx.fillText(`HP ${player.health}/${player.maxHealth}`, 220, centerY);
-    ctx.fillText(`Mana ${player.mana}/${player.maxMana}`, 430, centerY);
-    ctx.fillText(`Deck ${player.deck.length}`, 650, centerY);
-    ctx.fillText(`Hand ${player.hand.length}/${HAND_LIMIT}`, 840, centerY);
-    ctx.fillText(
-      `Board ${player.board.length}/${MAX_BOARD_SIZE}`,
-      1040,
+    this.drawStatusStat(
+      "MANA",
+      `${player.mana}/${player.maxMana}`,
+      54,
       centerY,
     );
+    this.drawStatusStat("DECK", player.deck.length, 1078, centerY);
+    this.drawHeroStatus(player, heroRect, heroType);
+  }
+
+  drawStatusStat(label, value, x, centerY) {
+    const rect = { x, y: centerY - 18, width: 148, height: 36 };
+
+    ctx.fillStyle = "#303846";
+    ctx.beginPath();
+    ctx.roundRect(rect.x, rect.y, rect.width, rect.height, 14);
+    ctx.fill();
+
+    ctx.fillStyle = "#c7d4e8";
+    ctx.font = "bold 12px Arial";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, rect.x + 16, centerY);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 18px Arial";
+    ctx.textAlign = "right";
+    ctx.fillText(value, rect.x + rect.width - 16, centerY + 1);
+  }
+
+  drawHeroStatus(player, rect, heroType) {
+    const healthColor =
+      player.health === player.maxHealth ? "#3cae5c" : "#d64045";
+    const isColorThief = heroType === "colorThief";
+    const centerX = rect.x + rect.width / 2;
+    const modelWidth = 58;
+    const healthGap = 18;
+    const minorOffsetY = 5;
+    let healthX;
+    let healthY = rect.y + rect.height / 2;
+
+    if (isColorThief) {
+      const modelScale = 1.25;
+      const modelX = centerX - 27 * modelScale;
+      const modelY = rect.y - 32 + minorOffsetY;
+
+      drawColorThief(modelX, modelY, modelScale, 1);
+      healthX = modelX + 60 * modelScale + healthGap;
+      healthY = rect.y + rect.height - 25;
+    } else {
+      const modelGap = 2;
+      const modelsWidth = modelWidth * 2 + modelGap;
+      const modelX = centerX - modelsWidth / 2;
+
+      drawMinionArt(
+        "unicorn",
+        { x: modelX, y: rect.y + 10, width: modelWidth, height: 88 },
+        { transparentBackground: true },
+      );
+      drawMinionArt(
+        "rainbow",
+        {
+          x: modelX + modelWidth + modelGap,
+          y: rect.y + 10,
+          width: modelWidth,
+          height: 88,
+        },
+        { transparentBackground: true },
+      );
+      healthX = modelX + modelsWidth + healthGap;
+    }
+
+    ctx.fillStyle = healthColor;
+    ctx.font = "bold 28px Arial";
+    ctx.textAlign = "left";
+    ctx.textBaseline = isColorThief ? "bottom" : "middle";
+    ctx.fillText(player.health, healthX, healthY + 20);
   }
 
   drawDeckInfo(player, rect, hint) {
@@ -409,8 +501,11 @@ class BattleScreen {
     const centerX = rect.x + rect.width / 2;
     const centerY = rect.y + rect.height / 2;
 
-    ctx.strokeStyle = "#1f1f1f";
+    ctx.strokeStyle = "#ff9b9f";
     ctx.lineWidth = 3;
+    ctx.shadowColor = "rgba(255, 76, 87, 0.9)";
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 0;
     ctx.beginPath();
     ctx.arc(centerX, centerY, 28, 0, PI * 2);
     ctx.stroke();
@@ -774,7 +869,7 @@ class BattleScreen {
         ...this.battle.enemy.board,
         {
           kind: "hero",
-          rect: rectFromZone(BATTLE_LAYOUT.enemyStatus),
+          rect: this.enemyHeroRect,
         },
       ];
     }

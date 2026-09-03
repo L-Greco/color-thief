@@ -24,8 +24,10 @@ class UnicornMinionArt {
     const x = rect.x + (rect.width - width) / 2;
     const y = rect.y + (rect.height - height) / 2;
 
-    ctx.fillStyle = "#000";
-    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    if (!options.transparentBackground) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    }
 
     ctx.save();
     // The source art keeps the editor's bottom-right coordinate system.
@@ -152,7 +154,7 @@ class UnicornMinionArt {
 }
 
 class RainbowFairyMinionArt {
-  draw(rect) {
+  draw(rect, options = {}) {
     const sourceWidth = 64;
     const sourceHeight = 96;
     const scale = Math.min(
@@ -164,8 +166,10 @@ class RainbowFairyMinionArt {
     const x = rect.x + (rect.width - width) / 2;
     const y = rect.y + (rect.height - height) / 2;
 
-    ctx.fillStyle = "#000";
-    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    if (!options.transparentBackground) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    }
 
     ctx.save();
     // The source art keeps the editor's bottom-right coordinate system.
