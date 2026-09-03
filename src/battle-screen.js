@@ -498,8 +498,13 @@ class BattleScreen {
 
   drawTargetMarker(target) {
     const rect = this.getTargetRect(target);
-    const centerX = rect.x + rect.width / 2;
-    const centerY = rect.y + rect.height / 2;
+    let centerX = rect.x + rect.width / 2;
+    let centerY = rect.y + rect.height / 2;
+
+    if (target.kind === "hero") {
+      centerX += 13;
+      centerY += 8;
+    }
 
     ctx.strokeStyle = "#ff9b9f";
     ctx.lineWidth = 3;
