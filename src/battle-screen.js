@@ -141,22 +141,6 @@ class BattleScreen {
 
     if (this.battle.isMulliganActive()) {
       this.drawMulligan();
-    } else {
-      this.drawDebugHelp();
-    }
-
-    if (!this.battle.enemy.board.length) {
-      this.drawBoardHint(
-        BATTLE_LAYOUT.enemyBoard,
-        "Enemy minions will appear here",
-      );
-    }
-
-    if (!this.battle.player.board.length) {
-      this.drawBoardHint(
-        BATTLE_LAYOUT.playerBoard,
-        "Drag simple cards here to play them",
-      );
     }
 
     if (DEBUG_BORDERS) {
@@ -506,26 +490,6 @@ class BattleScreen {
       ctx.textBaseline = "middle";
       ctx.fillText("End Turn", x + width / 2, y + height / 2 + 1 + offsetY);
     });
-  }
-
-  drawBoardHint(zone, label) {
-    ctx.fillStyle = "#666";
-    ctx.font = "18px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(label, zone[0] + zone[2] / 2, zone[1] + zone[3] / 2);
-  }
-
-  drawDebugHelp() {
-    ctx.fillStyle = "#333";
-    ctx.font = "16px Arial";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-      "Drag simple cards to the board. Click targeted cards or ready minions to choose a target.",
-      30,
-      410,
-    );
   }
 
   handleClick(point) {
