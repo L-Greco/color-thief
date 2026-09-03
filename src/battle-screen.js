@@ -151,12 +151,12 @@ class BattleScreen {
       this.playerHeroRect,
       "player",
     );
-    this.drawDeckBack(this.enemyDeckRect, "colorThief");
-    this.drawDeckBack(this.playerDeckRect, "player");
     this.drawTurnPanel();
     this.drawCards(this.battle.enemy.board);
     this.drawCards(this.battle.player.board);
     this.drawCards(this.battle.player.hand);
+    this.drawDeckBack(this.enemyDeckRect, "colorThief");
+    this.drawDeckBack(this.playerDeckRect, "player");
     this.drawTargetMode();
 
     if (this.battle.isMulliganActive()) {
