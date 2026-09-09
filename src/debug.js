@@ -1,7 +1,7 @@
 // Development-only configuration. Remove this script from index.html before shipping.
 debugConfig = {
   // Enable locally to start from the selected debug state.
-  enabled: false,
+  enabled: true,
   // "intro", "deckBuilding", "battle", "victory", or "defeat".
   startState: "deckBuilding",
   get allowManualDeckDraw() {

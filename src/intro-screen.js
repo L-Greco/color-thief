@@ -195,7 +195,7 @@ class IntroScreen {
 
     if (this.storyTime < INTRO_FIRST_LINE_DURATION) {
       ctx.fillText(
-        "On the planet Chroma, unicorns and rainbows lived happily and peacefully.",
+        "On the planet Chroma, unicorns and rainbow fairies lived happily and peacefully.",
         canvas.width / 2,
         110,
       );

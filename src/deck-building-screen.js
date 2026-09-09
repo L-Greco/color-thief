@@ -87,7 +87,7 @@ class DeckBuildingScreen {
       }
 
       ctx.fillStyle = "#fff";
-      ctx.font = "bold 20px Arial";
+      ctx.font = "bold 24px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(source.label, rect.x + rect.width / 2, rect.y + 58);

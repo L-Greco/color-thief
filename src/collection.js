@@ -290,13 +290,17 @@ rainbowCards = [
     cost: 5,
     attack: 4,
     health: 4,
-    text: "On Play: Deal 3 damage to an enemy minion.",
+    text: "On Play: Deal 2 damage to an enemy minion. Draw 1 card.",
     effects: [
       {
         trigger: "onPlay",
         type: "damage",
         target: "enemyMinion",
-        amount: 3,
+        amount: 2,
+      },
+      {
+        type: "draw",
+        amount: 1,
       },
     ],
   },
@@ -329,12 +333,16 @@ rainbowCards = [
     name: "Prism Bolt",
     type: "spell",
     cost: 2,
-    text: "Deal 3 damage to an enemy minion.",
+    text: "Deal 2 damage to an enemy minion. Draw 1 card.",
     effects: [
       {
         type: "damage",
         target: "enemyMinion",
-        amount: 3,
+        amount: 2,
+      },
+      {
+        type: "draw",
+        amount: 1,
       },
     ],
   },
