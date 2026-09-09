@@ -57,7 +57,10 @@ class Enemy extends Player {
         return true;
       }
 
-      const target = this.chooseAttackTarget(opponent);
+      const target = this.chooseAttackTarget(
+        opponent,
+        this.isLethal(battle, opponent),
+      );
 
       if (target.type === "minion") {
         return battle.attackMinion(this, attacker, opponent, target.value);
@@ -112,8 +115,17 @@ class Enemy extends Player {
     return null;
   }
 
-  chooseAttackTarget(opponent) {
-    if (opponent.board.length) {
+  isLethal(battle, opponent) {
+    const availableDamage = this.board.reduce((damage, minion) => {
+      if (!battle.canMinionAttack(this, minion).ok) return damage;
+      return damage + minion.attack;
+    }, 0);
+
+    return availableDamage >= opponent.health;
+  }
+
+  chooseAttackTarget(opponent, hasLethal = false) {
+    if (opponent.board.length && !hasLethal) {
       return {
         type: "minion",
         value: opponent.board[0],
