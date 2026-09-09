@@ -1,8 +1,12 @@
 const player = new Player();
 const enemy = new Enemy();
 const game = new Game(player, enemy);
-debugConfig.startBattle(game);
-// For deck-building debugging, replace the line above with game.startDeckBuilding().
+
+if (typeof debugConfig !== "undefined") {
+  debugConfig.start(game);
+} else {
+  game.startBeginning();
+}
 
 let previousTimeStamp = 0;
 

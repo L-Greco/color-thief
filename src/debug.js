@@ -1,6 +1,12 @@
 // Development-only configuration. Remove this script from index.html before shipping.
 debugConfig = {
-  allowManualDeckDraw: true,
+  // Enable locally to start from the selected debug state.
+  enabled: false,
+  // "intro", "deckBuilding", "battle", "victory", or "defeat".
+  startState: "deckBuilding",
+  get allowManualDeckDraw() {
+    return this.enabled;
+  },
   playerDeckConfig: [
     unicornCards[0], // Tiny Hoof
     unicornCards[0],
@@ -18,12 +24,35 @@ debugConfig = {
     unicornCards[14], // Charge of the Herd
     rainbowCards[1], // Color Sprite
     rainbowCards[1],
-    rainbowCards[3], // Paintling
+    rainbowCards[3], // Paint Sprite
     rainbowCards[3],
     rainbowCards[11], // Refraction
     rainbowCards[12], // Rainbow Beam
   ],
   startBattle(game) {
+    this.enabled = true;
     game.startBattle(this.playerDeckConfig);
+  },
+  start(game) {
+    if (!this.enabled) {
+      game.startBeginning();
+      return;
+    }
+
+    switch (this.startState) {
+      case "intro":
+        game.startIntro();
+        return;
+      case "battle":
+        this.startBattle(game);
+        return;
+      case "victory":
+      case "defeat":
+        game.showGameOver(this.startState);
+        return;
+      case "deckBuilding":
+      default:
+        game.startDeckBuilding();
+    }
   },
 };
