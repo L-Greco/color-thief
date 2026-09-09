@@ -2,10 +2,7 @@ class DeckBuildingScreen {
   constructor(game) {
     this.game = game;
     this.selectedSource = playerDeckSources[0];
-    this.selectedDeck =
-      typeof debugConfig === "undefined" || !debugConfig.playerDeckConfig
-        ? []
-        : [...debugConfig.playerDeckConfig];
+    this.selectedDeck = [];
     this.sourceDeckButtons = this.createSourceDeckButtons();
     this.sourceCardsPage = 0;
     this.cardsPerPage = 10;
@@ -54,7 +51,7 @@ class DeckBuildingScreen {
     ctx.font = "18px Arial";
     ctx.fillStyle = "#fff";
     ctx.fillText(
-      "Choose cards from Unicorn and Rainbow, then go to battle.",
+      "Choose cards from Unicorn and Rainbow Fairies, then go to battle.",
       70,
       102,
     );
@@ -77,7 +74,7 @@ class DeckBuildingScreen {
 
       if (selected) {
         ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 8;
         ctx.beginPath();
         ctx.roundRect(
           rect.x + 2,
@@ -90,7 +87,7 @@ class DeckBuildingScreen {
       }
 
       ctx.fillStyle = "#fff";
-      ctx.font = "bold 28px Arial";
+      ctx.font = "bold 20px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(source.label, rect.x + rect.width / 2, rect.y + 58);

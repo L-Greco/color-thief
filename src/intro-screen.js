@@ -17,16 +17,18 @@ class IntroScreen {
 
     this.storyTime += delta;
 
-    if (
-      !this.thiefMusicStarted &&
-      this.storyTime >= this.getThiefStartTime()
-    ) {
+    if (!this.thiefMusicStarted && this.storyTime >= this.getThiefStartTime()) {
       this.thiefMusicStarted = this.startColorThiefMusic();
     }
   }
 
   draw() {
-    const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    const background = ctx.createLinearGradient(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
     background.addColorStop(0, "#05070f");
     background.addColorStop(0.55, "#0c1024");
     background.addColorStop(1, "#15112a");
@@ -75,7 +77,8 @@ class IntroScreen {
       1,
       max(
         0,
-        (this.storyTime - this.getThiefStartTime()) / INTRO_THIEF_ENTER_DURATION,
+        (this.storyTime - this.getThiefStartTime()) /
+          INTRO_THIEF_ENTER_DURATION,
       ),
     );
   }
@@ -93,7 +96,9 @@ class IntroScreen {
       1,
       max(
         0,
-        (this.storyTime - this.getThiefStartTime() - INTRO_THIEF_ENTER_DURATION) /
+        (this.storyTime -
+          this.getThiefStartTime() -
+          INTRO_THIEF_ENTER_DURATION) /
           INTRO_DRAIN_DURATION,
       ),
     );
@@ -101,7 +106,9 @@ class IntroScreen {
 
   getStoryFadeProgress() {
     const drainEnd =
-      this.getThiefStartTime() + INTRO_THIEF_ENTER_DURATION + INTRO_DRAIN_DURATION;
+      this.getThiefStartTime() +
+      INTRO_THIEF_ENTER_DURATION +
+      INTRO_DRAIN_DURATION;
 
     return min(
       1,
@@ -120,7 +127,8 @@ class IntroScreen {
       1,
       max(
         0,
-        (this.storyTime - finalMessageStart) / INTRO_FINAL_MESSAGE_FADE_DURATION,
+        (this.storyTime - finalMessageStart) /
+          INTRO_FINAL_MESSAGE_FADE_DURATION,
       ),
     );
   }
@@ -137,7 +145,14 @@ class IntroScreen {
 
     const planetX = canvas.width * 0.72;
     const planetY = canvas.height * 0.58;
-    const colors = ["#f85b9d", "#f58b04", "#fbe201", "#1af6fb", "#0260fb", "#a500f7"];
+    const colors = [
+      "#f85b9d",
+      "#f58b04",
+      "#fbe201",
+      "#1af6fb",
+      "#0260fb",
+      "#a500f7",
+    ];
 
     for (let index = 0; index < INTRO_ESSENCE_PARTICLE_COUNT; index += 1) {
       const color = colors[index % colors.length];
@@ -209,7 +224,7 @@ class IntroScreen {
       ctx.font = "bold 20px Georgia";
       ctx.fillText("Press Enter or Space to continue", canvas.width / 2, 164);
       ctx.font = "16px Georgia";
-      ctx.fillText("Press I for game info", canvas.width / 2, 194);
+      ctx.fillText("Press i for game info", canvas.width / 2, 194);
     }
 
     ctx.globalAlpha = 1;

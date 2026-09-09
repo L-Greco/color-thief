@@ -10,7 +10,12 @@ class StartingScreen {
   }
 
   draw() {
-    const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    const background = ctx.createLinearGradient(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
     background.addColorStop(0, "#05070f");
     background.addColorStop(0.55, "#0c1024");
     background.addColorStop(1, "#15112a");
@@ -34,7 +39,7 @@ class StartingScreen {
     ctx.font = "bold 20px Georgia";
     ctx.fillText("Press Enter or Space to begin", 108, 466);
     ctx.font = "16px Georgia";
-    ctx.fillText("Press I for game info", 108, 496);
+    ctx.fillText("Press i for game info", 108, 496);
   }
 
   handleKeyDown(event) {
