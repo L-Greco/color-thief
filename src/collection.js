@@ -238,7 +238,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Paintling",
+    name: "Paint Sprite",
     type: "minion",
     cost: 2,
     attack: 2,
@@ -254,7 +254,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Spectrum Mage",
+    name: "Spectrum Fae",
     type: "minion",
     cost: 3,
     attack: 2,
@@ -269,7 +269,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Aurora Witch",
+    name: "Aurora Fae",
     type: "minion",
     cost: 3,
     attack: 2,
@@ -285,7 +285,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Prism Dragon",
+    name: "Prism Queen",
     type: "minion",
     cost: 5,
     attack: 4,
@@ -412,14 +412,14 @@ rainbowCards = [
 
 unicornCollection = {
   key: "unicorn",
-  label: "Unicorn",
+  label: "Unicorns",
   accent: "#ff9ecf",
   cards: unicornCards,
 };
 
 rainbowCollection = {
   key: "rainbow",
-  label: "Rainbow",
+  label: "Rainbow Fairies",
   accent: "#7fd7ff",
   cards: rainbowCards,
 };
