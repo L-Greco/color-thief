@@ -3,7 +3,7 @@ debugConfig = {
   // Enable locally to start from the selected debug state.
   enabled: true,
   // "intro", "deckBuilding", "battle", "victory", or "defeat".
-  startState: "deckBuilding",
+  startState: "victory",
   get allowManualDeckDraw() {
     return this.enabled;
   },

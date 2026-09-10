@@ -80,7 +80,7 @@ class Game {
       return this.battle && !this.battle.isAnimating();
     }
 
-    return this.screen && this.screen.outcome !== "defeat";
+    return this.screen && this.screen.canShowGameInfo();
   }
 
   closeGameInfo() {

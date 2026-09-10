@@ -11,6 +11,54 @@ createMinionGradient = (spX, spY, startColor, endColor) => {
   return gradient;
 };
 
+mixMinionColor = (from, to, progress) => {
+  const fromValue = parseInt(from.slice(1), 16);
+  const toValue = parseInt(to.slice(1), 16);
+  const fromRed = fromValue >> 16;
+  const fromGreen = (fromValue >> 8) & 255;
+  const fromBlue = fromValue & 255;
+  const toRed = toValue >> 16;
+  const toGreen = (toValue >> 8) & 255;
+  const toBlue = toValue & 255;
+
+  return `rgb(${round(lerp(fromRed, toRed, progress))}, ${round(lerp(fromGreen, toGreen, progress))}, ${round(lerp(fromBlue, toBlue, progress))})`;
+};
+
+createUnicornRestorationGradient = (spX, spY, progress) => {
+  const gradient = ctx.createLinearGradient(
+    spX - 30,
+    spY + 29,
+    spX + 30,
+    spY - 30,
+  );
+  gradient.addColorStop(0, mixMinionColor("#d4d8dc", "#ffffff", progress));
+  gradient.addColorStop(1, mixMinionColor("#4d535c", "#ffffff", progress));
+  return gradient;
+};
+
+createFairyRestorationGradient = (spX, spY, progress) => {
+  const gradient = ctx.createLinearGradient(
+    spX - 34,
+    spY + 12,
+    spX + 20,
+    spY + 12,
+  );
+  const colorStops = [
+    [0, "#d4d8dc", "#f85b9d"],
+    [0.16, "#c0c5ca", "#f58b04"],
+    [0.31, "#aeb3b9", "#fbe201"],
+    [0.43, "#a3a9b0", "#1ae8f6"],
+    [0.65, "#999fa7", "#1ae8f6"],
+    [0.82, "#858c95", "#0260fb"],
+    [1, "#6e747d", "#a500f7"],
+  ];
+
+  colorStops.forEach(([position, grey, color]) => {
+    gradient.addColorStop(position, mixMinionColor(grey, color, progress));
+  });
+  return gradient;
+};
+
 class UnicornMinionArt {
   draw(rect, options = {}) {
     const sourceWidth = 64;
@@ -33,16 +81,19 @@ class UnicornMinionArt {
     // The source art keeps the editor's bottom-right coordinate system.
     ctx.translate(x + width, y + height);
     ctx.scale(-scale, -scale);
-    this.drawUnicorn(options.unique);
+    this.drawUnicorn(options.unique, options.restorationProgress);
     ctx.restore();
   }
 
-  drawUnicorn(isUnique) {
+  drawUnicorn(isUnique, restorationProgress) {
     const spX = 25;
     const spY = 48;
-    const unicornColor = isUnique
-      ? this.createUniqueGradient(spX, spY)
-      : createMinionGradient(spX, spY, "#d4d8dc", "#fce8ae");
+    const unicornColor =
+      typeof restorationProgress === "number"
+        ? createUnicornRestorationGradient(spX, spY, restorationProgress)
+        : isUnique
+          ? this.createUniqueGradient(spX, spY)
+          : createMinionGradient(spX, spY, "#d4d8dc", "#fce8ae");
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -175,11 +226,11 @@ class RainbowFairyMinionArt {
     // The source art keeps the editor's bottom-right coordinate system.
     ctx.translate(x + width, y + height);
     ctx.scale(-scale, -scale);
-    this.drawFairy();
+    this.drawFairy(options.restorationProgress);
     ctx.restore();
   }
 
-  drawFairy() {
+  drawFairy(restorationProgress) {
     const spX = 52;
     const spY = 30;
     const scale = 1.5;
@@ -189,7 +240,10 @@ class RainbowFairyMinionArt {
     ctx.scale(scale, scale);
     ctx.translate(-spX, -spY);
 
-    ctx.fillStyle = createMinionGradient(spX, spY, "#ffffff", "#6e6e6e");
+    ctx.fillStyle =
+      typeof restorationProgress === "number"
+        ? createFairyRestorationGradient(spX, spY, restorationProgress)
+        : createMinionGradient(spX, spY, "#ffffff", "#6e6e6e");
     ctx.beginPath();
     ctx.moveTo(spX, spY);
     ctx.bezierCurveTo(
