@@ -1,0 +1,21 @@
+{
+  "name": "color-thief-js13k",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/serve.mjs . 4173",
+    "debug": "node tools/serve.mjs . 4173 deckBuilding",
+    "build": "node tools/build.mjs prod",
+    "build:debug": "node tools/build.mjs debug",
+    "build:mangled": "node tools/build.mjs mangled",
+    "build:preprod": "node tools/build.mjs preprod",
+    "build:prod": "node tools/build.mjs prod",
+    "preview": "node tools/serve.mjs build/prod 4174",
+    "preview:debug": "node tools/serve.mjs build/debug 4175 deckBuilding",
+    "zip:prod": "node tools/build.mjs prod"
+  },
+  "devDependencies": {
+    "roadroller": "^2.1.0",
+    "terser": "^5.44.0"
+  }
+}

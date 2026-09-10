@@ -380,7 +380,9 @@ class Card {
       return;
     }
 
-    if (this.type === "spell" && this.getBadgeIconKey() === "damage") {
+    const iconKey = this.getBadgeIconKey();
+
+    if (this.type === "spell" && iconKey === "damage") {
       const lightningScale = Math.min(rect.width / 40, rect.height / 40) * 0.75;
       drawLightning(
         rect.x + rect.width / 2,
@@ -390,17 +392,12 @@ class Card {
       return;
     }
 
-    if (this.type === "spell" && this.getBadgeIconKey() === "support") {
+    if (this.type === "spell" && iconKey === "support") {
       const starScale = Math.min(rect.width / 52, rect.height / 52) * 0.75;
       drawStar(rect.x + rect.width / 2, rect.y + rect.height / 2, starScale);
       return;
     }
 
-    if (spellIconSheet.complete) {
-      ctx.imageSmoothingEnabled = false;
-      this.drawSpellIcon(rect);
-      ctx.imageSmoothingEnabled = true;
-    }
   }
 
   drawEffectBox(rect, palette) {
@@ -433,8 +430,6 @@ class Card {
 
     if (!iconKey) return;
 
-    const frame = spellIconFrames[iconKey];
-
     ctx.fillStyle = "#15111d";
     ctx.fillRect(this.x + 8, this.y + 29, 16, 16);
     ctx.strokeStyle = palette.border;
@@ -451,21 +446,6 @@ class Card {
       return;
     }
 
-    if (!spellIconSheet.complete) return;
-
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(
-      spellIconSheet,
-      frame.x,
-      frame.y,
-      frame.width,
-      frame.height,
-      this.x + 9,
-      this.y + 30,
-      14,
-      14,
-    );
-    ctx.imageSmoothingEnabled = true;
   }
 
   drawFooter(palette) {
@@ -538,38 +518,14 @@ class Card {
     };
   }
 
-  getSpellIconFrame() {
-    const iconKey = this.getBadgeIconKey() || "support";
-    return spellIconFrames[iconKey];
-  }
-
   getBadgeIconKey() {
     if (!this.effects.length) return null;
-    if (this.type === "spell" && this.theme === "enemy") return "void";
+    if (this.type === "spell" && this.theme === "enemy") return "damage";
 
     const hasDamage = this.effects.some((effect) => effect.type === "damage");
 
     if (hasDamage) return "damage";
     return "support";
-  }
-
-  drawSpellIcon(rect) {
-    const frame = this.getSpellIconFrame();
-    const size = Math.min(rect.width, rect.height) * 0.68;
-    const dx = rect.x + (rect.width - size) / 2;
-    const dy = rect.y + (rect.height - size) / 2;
-
-    ctx.drawImage(
-      spellIconSheet,
-      frame.x,
-      frame.y,
-      frame.width,
-      frame.height,
-      dx,
-      dy,
-      size,
-      size,
-    );
   }
 
   effectLabel() {

@@ -738,6 +738,22 @@ class BattleScreen {
       return this.handleTargetModeClick(point);
     }
 
+    if (
+      this.canManuallyDrawFromDeck() &&
+      pointCollision(this.playerDeckRect, point)
+    ) {
+      this.battle.drawCardForPlayer();
+      return true;
+    }
+
+    if (
+      this.canManuallyDrawFromDeck() &&
+      pointCollision(this.enemyDeckRect, point)
+    ) {
+      this.battle.drawCardForEnemy();
+      return true;
+    }
+
     const boardMinion = this.findHoveredPlayerBoardMinion(point);
 
     if (boardMinion && this.canStartAttackSelection(boardMinion)) {
@@ -974,6 +990,10 @@ class BattleScreen {
 
   canInteractWithHandCard(card) {
     return this.canDragHandCard(card) || this.canStartCardTargetSelection(card);
+  }
+
+  canManuallyDrawFromDeck() {
+    return globalThis.debugConfig?.allowManualDeckDraw;
   }
 
   getActionTargets() {

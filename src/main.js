@@ -1,7 +1,12 @@
 const player = new Player();
 const enemy = new Enemy();
 const game = new Game(player, enemy);
-game.startBeginning();
+
+if (globalThis.debugConfig) {
+  globalThis.debugConfig.start(game);
+} else {
+  game.startBeginning();
+}
 
 let previousTimeStamp = 0;
 
