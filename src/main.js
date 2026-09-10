@@ -1,22 +1,17 @@
 const player = new Player();
 const enemy = new Enemy();
 const game = new Game(player, enemy);
-
-if (globalThis.debugConfig) {
-  globalThis.debugConfig.start(game);
-} else {
-  game.startBeginning();
-}
+game.startBeginning();
 
 let previousTimeStamp = 0;
 
-function normalizeDelta(delta) {
+normalizeDelta = (delta) => {
   if (delta < 0) return 0;
   if (delta > MAX_DELTA) return MAX_DELTA;
   return delta;
-}
+};
 
-function gameLoop(timestamp) {
+gameLoop = (timestamp) => {
   let delta = 0;
 
   if (previousTimeStamp !== 0) {
@@ -29,5 +24,5 @@ function gameLoop(timestamp) {
   game.draw();
 
   requestAnimationFrame(gameLoop);
-}
+};
 requestAnimationFrame(gameLoop);

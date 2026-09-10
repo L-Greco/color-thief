@@ -1,10 +1,6 @@
 class Enemy extends Player {
   turnPhase = "idle";
 
-  constructor(name = "Enemy") {
-    super(name);
-  }
-
   resetBattleState() {
     super.resetBattleState();
     this.maxMana = 0;

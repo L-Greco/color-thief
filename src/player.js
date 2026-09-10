@@ -1,5 +1,4 @@
 class Player {
-  name = "Player";
   health = 20;
   maxHealth = 20;
 
@@ -9,10 +8,6 @@ class Player {
   deck = [];
   hand = [];
   board = [];
-
-  constructor(name = "Player") {
-    this.name = name;
-  }
 
   resetBattleState() {
     this.health = this.maxHealth;

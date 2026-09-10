@@ -29,7 +29,7 @@ createServer((request, response) => {
     if (state && target === resolve(root, "index.html") && existsSync(debugFile)) {
       const html = readFileSync(target, "utf8").replace(
         '<script src="./src/main.js"></script>',
-        '<script src="./src/debug.js"></script>\n    <script src="./src/main.js"></script>',
+        '<script src="./src/main.js"></script>\n    <script src="./src/debug.js"></script>',
       );
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }).end(html);
       return;

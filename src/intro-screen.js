@@ -23,20 +23,7 @@ class IntroScreen {
   }
 
   draw() {
-    const background = ctx.createLinearGradient(
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
-    background.addColorStop(0, "#05070f");
-    background.addColorStop(0.55, "#0c1024");
-    background.addColorStop(1, "#15112a");
-    ctx.fillStyle = background;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawStarfield(this.game.stars);
-    this.drawPlanet();
+    drawStoryBackground(this.game.stars, this.getDrainProgress());
 
     if (this.titleExitProgress < 1) {
       this.drawTitle();
@@ -46,15 +33,6 @@ class IntroScreen {
     this.drawColorEssence();
     this.drawThief();
     this.drawStoryText();
-  }
-
-  drawPlanet() {
-    drawStoryPlanet(
-      canvas.width * 0.72,
-      canvas.height * 0.58,
-      210,
-      this.getDrainProgress(),
-    );
   }
 
   drawTitle() {

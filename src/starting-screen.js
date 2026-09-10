@@ -10,19 +10,7 @@ class StartingScreen {
   }
 
   draw() {
-    const background = ctx.createLinearGradient(
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
-    background.addColorStop(0, "#05070f");
-    background.addColorStop(0.55, "#0c1024");
-    background.addColorStop(1, "#15112a");
-    ctx.fillStyle = background;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawStarfield(this.game.stars);
-    drawStoryPlanet(canvas.width * 0.72, canvas.height * 0.58, 210);
+    drawStoryBackground(this.game.stars);
 
     ctx.shadowColor = "rgba(230, 241, 255, 0.55)";
     ctx.shadowBlur = 20;

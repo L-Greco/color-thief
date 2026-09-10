@@ -39,9 +39,8 @@ const SOURCE_FILES = [
   "src/main.js",
 ];
 const DEBUG_SOURCE_FILES = [
-  ...SOURCE_FILES.slice(0, -1),
+  ...SOURCE_FILES,
   "src/debug.js",
-  SOURCE_FILES.at(-1),
 ];
 const CARD_TYPES = ["minion", "spell"];
 const EFFECT_TRIGGERS = ["onPlay", "onDeath"];
@@ -70,6 +69,7 @@ const MANGLED_PROPERTIES = [
   "board",
   "canAttack",
   "canLeave",
+  "cardScale",
   "cardsPerPage",
   "closeRect",
   "cost",
@@ -172,6 +172,7 @@ const MANGLED_OBJECT_PROPERTIES = [
   "banner",
   "border",
   "card",
+  "cards",
   "center",
   "color",
   "controller",
@@ -182,6 +183,7 @@ const MANGLED_OBJECT_PROPERTIES = [
   "kind",
   "message",
   "minion",
+  "opponent",
   "paper",
   "radius",
   "rect",
@@ -270,7 +272,7 @@ function compactEffect(effect) {
 function compactCards(cards) {
   return cards.map((card) => [
     card.name,
-    CARD_TYPES.indexOf(card.type),
+    CARD_TYPES.indexOf(card.type || "minion"),
     card.cost,
     card.attack ?? 0,
     card.health ?? 0,
@@ -510,9 +512,11 @@ async function buildProduction(mode) {
   const candidates = [];
 
   for (const dataMode of ["source", "compact"]) {
-    const dataSource = dataMode === "compact"
-      ? readRuntimeSource({ compactData: true })
-      : source;
+    const dataSource = dataMode === "source"
+      ? source
+      : readRuntimeSource({
+        compactData: dataMode === "compact",
+        });
 
     {
       const terser = await mangleSource(dataSource, { compress: true });

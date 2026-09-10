@@ -70,6 +70,17 @@ drawStarfield = (stars, opacity = 1) => {
   });
 };
 
+drawStoryBackground = (stars, greyProgress = 0) => {
+  const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  background.addColorStop(0, "#05070f");
+  background.addColorStop(0.55, "#0c1024");
+  background.addColorStop(1, "#15112a");
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawStarfield(stars);
+  drawStoryPlanet(canvas.width * 0.72, canvas.height * 0.58, 210, greyProgress);
+};
+
 drawStoryPlanet = (x, y, radius, greyProgress = 0) => {
   const halo = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius * 1.55);
   halo.addColorStop(0, `rgba(230, 241, 255, ${0.28 - greyProgress * 0.08})`);

@@ -123,7 +123,7 @@ class BattleScreen {
     cards.forEach((card, index) => {
       card.setPosition(startX + spacing * index, y);
       card.setHover(false);
-      card.scale = 1;
+      card.cardScale = 1;
     });
   }
 
@@ -501,7 +501,7 @@ class BattleScreen {
 
       ctx.font = "15px Arial";
       drawWrappedText(
-        card.text || card.effectLabel(),
+        card.text,
         x + 24,
         y + 64,
         272,
@@ -738,22 +738,6 @@ class BattleScreen {
       return this.handleTargetModeClick(point);
     }
 
-    if (
-      this.canManuallyDrawFromDeck() &&
-      pointCollision(this.playerDeckRect, point)
-    ) {
-      this.battle.drawCardForPlayer();
-      return true;
-    }
-
-    if (
-      this.canManuallyDrawFromDeck() &&
-      pointCollision(this.enemyDeckRect, point)
-    ) {
-      this.battle.drawCardForEnemy();
-      return true;
-    }
-
     const boardMinion = this.findHoveredPlayerBoardMinion(point);
 
     if (boardMinion && this.canStartAttackSelection(boardMinion)) {
@@ -888,7 +872,7 @@ class BattleScreen {
       point.y - this.dragOffset.y,
     );
     this.dragCard.setHover(false);
-    this.dragCard.scale = 1.05;
+    this.dragCard.cardScale = 1.05;
     canvas.style.cursor = "grabbing";
     return true;
   }
@@ -920,7 +904,7 @@ class BattleScreen {
     );
 
     this.dragCard = null;
-    card.scale = 1;
+    card.cardScale = 1;
     this.suppressClick = true;
 
     if (droppedOnPlayerBoard) {
@@ -990,10 +974,6 @@ class BattleScreen {
 
   canInteractWithHandCard(card) {
     return this.canDragHandCard(card) || this.canStartCardTargetSelection(card);
-  }
-
-  canManuallyDrawFromDeck() {
-    return globalThis.debugConfig?.allowManualDeckDraw;
   }
 
   getActionTargets() {

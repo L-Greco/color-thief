@@ -58,39 +58,37 @@ createFairyRestorationGradient = (spX, spY, progress) => {
   return gradient;
 };
 
-class UnicornMinionArt {
-  draw(rect, options = {}) {
-    const sourceWidth = 64;
-    const sourceHeight = 96;
-    const scale = Math.min(
-      rect.width / sourceWidth,
-      rect.height / sourceHeight,
-    );
-    const width = sourceWidth * scale;
-    const height = sourceHeight * scale;
-    const x = rect.x + (rect.width - width) / 2;
-    const y = rect.y + (rect.height - height) / 2;
+drawMinionModel = (renderer, rect, options) => {
+  const scale = Math.min(rect.width / 64, rect.height / 96);
+  const width = 64 * scale;
+  const height = 96 * scale;
+  const x = rect.x + (rect.width - width) / 2;
+  const y = rect.y + (rect.height - height) / 2;
 
-    if (!options.transparentBackground) {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-    }
-
-    ctx.save();
-    // The source art keeps the editor's bottom-right coordinate system.
-    ctx.translate(x + width, y + height);
-    ctx.scale(-scale, -scale);
-    this.drawUnicorn(options.unique, options.restorationProgress);
-    ctx.restore();
+  if (!options.transparentBackground) {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
   }
 
-  drawUnicorn(isUnique, restorationProgress) {
+  ctx.save();
+  ctx.translate(x + width, y + height);
+  ctx.scale(-scale, -scale);
+  renderer.drawArt(options);
+  ctx.restore();
+};
+
+class UnicornMinionArt {
+  draw(rect, options = {}) {
+    drawMinionModel(this, rect, options);
+  }
+
+  drawArt(options) {
     const spX = 25;
     const spY = 48;
     const unicornColor =
-      typeof restorationProgress === "number"
-        ? createUnicornRestorationGradient(spX, spY, restorationProgress)
-        : isUnique
+      typeof options.restorationProgress === "number"
+        ? createUnicornRestorationGradient(spX, spY, options.restorationProgress)
+        : options.unique
           ? this.createUniqueGradient(spX, spY)
           : createMinionGradient(spX, spY);
 
@@ -205,31 +203,10 @@ class UnicornMinionArt {
 
 class RainbowFairyMinionArt {
   draw(rect, options = {}) {
-    const sourceWidth = 64;
-    const sourceHeight = 96;
-    const scale = Math.min(
-      rect.width / sourceWidth,
-      rect.height / sourceHeight,
-    );
-    const width = sourceWidth * scale;
-    const height = sourceHeight * scale;
-    const x = rect.x + (rect.width - width) / 2;
-    const y = rect.y + (rect.height - height) / 2;
-
-    if (!options.transparentBackground) {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-    }
-
-    ctx.save();
-    // The source art keeps the editor's bottom-right coordinate system.
-    ctx.translate(x + width, y + height);
-    ctx.scale(-scale, -scale);
-    this.drawFairy(options.restorationProgress);
-    ctx.restore();
+    drawMinionModel(this, rect, options);
   }
 
-  drawFairy(restorationProgress) {
+  drawArt(options) {
     const spX = 52;
     const spY = 30;
     const scale = 1.5;
@@ -240,8 +217,8 @@ class RainbowFairyMinionArt {
     ctx.translate(-spX, -spY);
 
     ctx.fillStyle =
-      typeof restorationProgress === "number"
-        ? createFairyRestorationGradient(spX, spY, restorationProgress)
+      typeof options.restorationProgress === "number"
+        ? createFairyRestorationGradient(spX, spY, options.restorationProgress)
         : createMinionGradient(spX, spY);
     ctx.beginPath();
     ctx.moveTo(spX, spY);
@@ -332,31 +309,10 @@ class RainbowFairyMinionArt {
 
 class EnemyMinionArt {
   draw(rect, options = {}) {
-    const sourceWidth = 64;
-    const sourceHeight = 96;
-    const scale = Math.min(
-      rect.width / sourceWidth,
-      rect.height / sourceHeight,
-    );
-    const width = sourceWidth * scale;
-    const height = sourceHeight * scale;
-    const x = rect.x + (rect.width - width) / 2;
-    const y = rect.y + (rect.height - height) / 2;
-
-    if (!options.transparentBackground) {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-    }
-
-    ctx.save();
-    // The source art keeps the editor's bottom-right coordinate system.
-    ctx.translate(x + width, y + height);
-    ctx.scale(-scale, -scale);
-    this.drawEnemy();
-    ctx.restore();
+    drawMinionModel(this, rect, options);
   }
 
-  drawEnemy() {
+  drawArt() {
     const spX = 32;
     const spY = 45;
     const scale = 1.4;

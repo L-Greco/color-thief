@@ -61,3 +61,29 @@ if (["intro", "deckBuilding", "battle", "victory", "defeat"].includes(debugState
   debugConfig.enabled = true;
   debugConfig.startState = debugState;
 }
+
+const originalHandleBattleClick = BattleScreen.prototype.handleClick;
+
+BattleScreen.prototype.handleClick = function handleDebugBattleClick(point) {
+  if (
+    debugConfig.allowManualDeckDraw &&
+    !this.battle.isMulliganActive() &&
+    !this.suppressClick &&
+    !this.dragCard &&
+    !this.selectedAction
+  ) {
+    if (pointCollision(this.playerDeckRect, point)) {
+      this.battle.drawCardForPlayer();
+      return true;
+    }
+
+    if (pointCollision(this.enemyDeckRect, point)) {
+      this.battle.drawCardForEnemy();
+      return true;
+    }
+  }
+
+  return originalHandleBattleClick.call(this, point);
+};
+
+debugConfig.start(game);

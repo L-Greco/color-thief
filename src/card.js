@@ -2,7 +2,7 @@ class Card {
   hovered = false;
   hoverDuration = 0.3;
   hoverProgress = 0;
-  scale = 1;
+  cardScale = 1;
   hitEffectTime = 0;
   hitRotation = 0;
   hitOverlayAlpha = 0;
@@ -28,19 +28,19 @@ class Card {
   isTargetSource = false;
 
   constructor(
-    x = 0,
-    y = 0,
-    width = CARD_WIDTH,
-    height = CARD_HEIGHT,
-    name = "Unicorn",
-    type = "minion",
-    cost = 0,
-    health = 2,
-    attack = 1,
-    effects = [],
-    text = "",
-    unique = false,
-    theme = "neutral",
+    x,
+    y,
+    width,
+    height,
+    name,
+    type,
+    cost,
+    health,
+    attack,
+    effects,
+    text,
+    unique,
+    theme,
   ) {
     this.x = x;
     this.y = y;
@@ -152,7 +152,7 @@ class Card {
       ? easeOut(this.hoverProgress)
       : easeIn(this.hoverProgress);
 
-    this.scale = lerp(1, 1.2, easedProgress);
+    this.cardScale = lerp(1, 1.2, easedProgress);
     this.attackRotation = 0;
     this.attackScaleBoost = 0;
     this.attackOffsetX = 0;
@@ -179,7 +179,7 @@ class Card {
 
     if (this.drawEffectDelay > 0) {
       this.drawEffectDelay = max(0, this.drawEffectDelay - delta);
-      this.scale = CARD_DRAW_EFFECT_START_SCALE;
+      this.cardScale = CARD_DRAW_EFFECT_START_SCALE;
       this.drawAlpha = 0;
       return;
     }
@@ -196,7 +196,7 @@ class Card {
 
       this.x = lerp(this.drawStartX, this.drawTargetX, easedProgress);
       this.y = lerp(this.drawStartY, this.drawTargetY, easedProgress);
-      this.scale = lerp(CARD_DRAW_EFFECT_START_SCALE, 1, easedProgress);
+      this.cardScale = lerp(CARD_DRAW_EFFECT_START_SCALE, 1, easedProgress);
       this.drawAlpha = lerp(0.35, 1, easedProgress);
       return;
     }
@@ -245,8 +245,8 @@ class Card {
     ctx.translate(0, -this.deathRise);
     ctx.rotate(this.hitRotation + this.attackRotation);
     ctx.scale(
-      (this.scale + this.attackScaleBoost) * this.deathScale,
-      (this.scale + this.attackScaleBoost) * this.deathScale,
+      (this.cardScale + this.attackScaleBoost) * this.deathScale,
+      (this.cardScale + this.attackScaleBoost) * this.deathScale,
     );
     ctx.translate(-centerX, -centerY);
 
@@ -414,7 +414,7 @@ class Card {
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     drawWrappedText(
-      this.effectLabel(),
+      this.text,
       rect.x + 4,
       rect.y + 4,
       rect.width - 8,
@@ -528,33 +528,6 @@ class Card {
     return "support";
   }
 
-  effectLabel() {
-    if (this.text) return this.text;
-
-    const primaryEffect = this.effects[0];
-
-    if (!primaryEffect) return this.type;
-    const triggerLabel = this.effectTriggerLabel(primaryEffect.trigger);
-    const effectLabel = this.primaryEffectLabel(primaryEffect);
-
-    return triggerLabel ? `${triggerLabel}: ${effectLabel}` : effectLabel;
-  }
-
-  effectTriggerLabel(trigger) {
-    if (trigger === "onPlay") return "On Play";
-    if (trigger === "onDeath") return "On Death";
-    return "";
-  }
-
-  primaryEffectLabel(effect) {
-    if (effect.type === "draw") return `Draw ${effect.amount}`;
-    if (effect.type === "heal") return `Heal ${effect.amount}`;
-    if (effect.type === "damage") return `Deal ${effect.amount}`;
-    if (effect.type === "buff") return "Buff";
-    if (effect.type === "returnToHand") return "Bounce";
-    return this.type;
-  }
-
   getPalette() {
     if (this.theme === "rainbow") {
       return {
@@ -604,10 +577,10 @@ createCardFromConfig = (config, x = 0, y = 0) =>
     CARD_HEIGHT,
     config.name,
     config.type || "minion",
-    config.cost || 0,
+    config.cost,
     config.health ?? 0,
     config.attack ?? 0,
-    (config.effects || []).map((effect) => ({ ...effect })),
+    config.effects || [],
     config.text || "",
     !!config.unique,
     inferCardTheme(config),

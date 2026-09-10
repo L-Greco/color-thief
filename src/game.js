@@ -1,13 +1,4 @@
-states = {
-  starting: "Starting",
-  intro: "Intro",
-  deckBuilding: "Deck Building",
-  battle: "Battle",
-  gameOver: "Game Over",
-};
-
 class Game {
-  state = states.starting;
   screen = null;
   battle = null;
 
@@ -20,28 +11,24 @@ class Game {
 
   startBeginning() {
     this.closeGameInfo();
-    this.state = states.starting;
     this.battle = null;
     this.screen = new StartingScreen(this);
   }
 
   startIntro() {
     this.closeGameInfo();
-    this.state = states.intro;
     this.battle = null;
     this.screen = new IntroScreen(this);
   }
 
   startDeckBuilding() {
     this.closeGameInfo();
-    this.state = states.deckBuilding;
     this.battle = null;
     this.screen = new DeckBuildingScreen(this);
   }
 
   startBattle(playerDeckConfig) {
     this.closeGameInfo();
-    this.state = states.battle;
     this.battle = new BattleState(
       this,
       this.player,
@@ -54,25 +41,13 @@ class Game {
 
   showGameOver(outcome) {
     this.closeGameInfo();
-    this.state = states.gameOver;
     this.battle = null;
     this.screen = new GameOverScreen(this, outcome);
   }
 
   canShowGameInfo() {
-    if (this.state === states.starting || this.state === states.deckBuilding) {
-      return true;
-    }
-
-    if (this.state === states.intro) {
-      return this.screen && this.screen.canShowGameInfo();
-    }
-
-    if (this.state === states.battle) {
-      return this.battle && !this.battle.isAnimating();
-    }
-
-    return this.screen && this.screen.canShowGameInfo();
+    if (this.battle) return !this.battle.isAnimating();
+    return this.screen?.canShowGameInfo?.() ?? true;
   }
 
   closeGameInfo() {

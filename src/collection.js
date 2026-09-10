@@ -4,7 +4,6 @@ DEFAULT_DECK_COPIES = 2;
 unicornCards = [
   {
     name: "Tiny Hoof",
-    type: "minion",
     cost: 1,
     attack: 1,
     health: 1,
@@ -21,14 +20,12 @@ unicornCards = [
   },
   {
     name: "Sparkhorn Foal",
-    type: "minion",
     cost: 1,
     attack: 2,
     health: 1,
   },
   {
     name: "Sunbeam Unicorn",
-    type: "minion",
     cost: 2,
     attack: 2,
     health: 2,
@@ -45,35 +42,30 @@ unicornCards = [
   },
   {
     name: "Cloudmane Charger",
-    type: "minion",
     cost: 2,
     attack: 3,
     health: 2,
   },
   {
     name: "Stable Guardian",
-    type: "minion",
     cost: 2,
     attack: 2,
     health: 4,
   },
   {
     name: "Silverhorn Knight",
-    type: "minion",
     cost: 3,
     attack: 3,
     health: 4,
   },
   {
     name: "Battle Unicorn",
-    type: "minion",
     cost: 3,
     attack: 4,
     health: 3,
   },
   {
     name: "Healing Mare",
-    type: "minion",
     cost: 3,
     attack: 2,
     health: 4,
@@ -89,7 +81,6 @@ unicornCards = [
   },
   {
     name: "Hornbreaker",
-    type: "minion",
     cost: 4,
     attack: 4,
     health: 4,
@@ -105,7 +96,6 @@ unicornCards = [
   },
   {
     name: "Crowned Unicorn",
-    type: "minion",
     cost: 7,
     attack: 7,
     health: 8,
@@ -195,7 +185,6 @@ unicornCards = [
 rainbowCards = [
   {
     name: "Rainbow Fairy",
-    type: "minion",
     cost: 1,
     attack: 1,
     health: 1,
@@ -209,7 +198,6 @@ rainbowCards = [
   },
   {
     name: "Color Sprite",
-    type: "minion",
     cost: 1,
     attack: 1,
     health: 1,
@@ -224,7 +212,6 @@ rainbowCards = [
   },
   {
     name: "Prism Pixie",
-    type: "minion",
     cost: 2,
     attack: 1,
     health: 2,
@@ -239,7 +226,6 @@ rainbowCards = [
   },
   {
     name: "Paint Sprite",
-    type: "minion",
     cost: 2,
     attack: 2,
     health: 2,
@@ -255,7 +241,6 @@ rainbowCards = [
   },
   {
     name: "Spectrum Fae",
-    type: "minion",
     cost: 3,
     attack: 2,
     health: 3,
@@ -270,7 +255,6 @@ rainbowCards = [
   },
   {
     name: "Aurora Fae",
-    type: "minion",
     cost: 3,
     attack: 2,
     health: 3,
@@ -286,7 +270,6 @@ rainbowCards = [
   },
   {
     name: "Prism Queen",
-    type: "minion",
     cost: 5,
     attack: 4,
     health: 4,
@@ -444,39 +427,15 @@ inferCardTheme = (cardConfig) => {
   return "neutral";
 };
 
-enemyStarterDeckConfig = [
+enemyDeckCards = [
   {
     name: "Grey Grunt",
-    type: "minion",
-    cost: 1,
-    attack: 2,
-    health: 3,
-  },
-  {
-    name: "Grey Grunt",
-    type: "minion",
     cost: 1,
     attack: 2,
     health: 3,
   },
   {
     name: "Shade Snatcher",
-    type: "minion",
-    cost: 2,
-    attack: 3,
-    health: 3,
-    text: "On Play: Deal 1 damage to the enemy hero.",
-    effects: [
-      {
-        trigger: "onPlay",
-        type: "damage",
-        amount: 1,
-      },
-    ],
-  },
-  {
-    name: "Shade Snatcher",
-    type: "minion",
     cost: 2,
     attack: 3,
     health: 3,
@@ -491,23 +450,6 @@ enemyStarterDeckConfig = [
   },
   {
     name: "Pigment Parasite",
-    type: "minion",
-    cost: 2,
-    attack: 2,
-    health: 4,
-    text: "On Play: Deal 1 damage to an enemy minion.",
-    effects: [
-      {
-        trigger: "onPlay",
-        type: "damage",
-        target: "enemyMinion",
-        amount: 1,
-      },
-    ],
-  },
-  {
-    name: "Pigment Parasite",
-    type: "minion",
     cost: 2,
     attack: 2,
     health: 4,
@@ -523,51 +465,18 @@ enemyStarterDeckConfig = [
   },
   {
     name: "Hue Hunter",
-    type: "minion",
-    cost: 3,
-    attack: 4,
-    health: 4,
-  },
-  {
-    name: "Hue Hunter",
-    type: "minion",
     cost: 3,
     attack: 4,
     health: 4,
   },
   {
     name: "Color Crusher",
-    type: "minion",
-    cost: 4,
-    attack: 5,
-    health: 5,
-  },
-  {
-    name: "Color Crusher",
-    type: "minion",
     cost: 4,
     attack: 5,
     health: 5,
   },
   {
     name: "Prism Breaker",
-    type: "minion",
-    cost: 4,
-    attack: 4,
-    health: 6,
-    text: "On Play: Deal 2 damage to an enemy minion.",
-    effects: [
-      {
-        trigger: "onPlay",
-        type: "damage",
-        target: "enemyMinion",
-        amount: 2,
-      },
-    ],
-  },
-  {
-    name: "Prism Breaker",
-    type: "minion",
     cost: 4,
     attack: 4,
     health: 6,
@@ -583,14 +492,6 @@ enemyStarterDeckConfig = [
   },
   {
     name: "Void Beast",
-    type: "minion",
-    cost: 6,
-    attack: 7,
-    health: 7,
-  },
-  {
-    name: "Void Beast",
-    type: "minion",
     cost: 6,
     attack: 7,
     health: 7,
@@ -609,40 +510,6 @@ enemyStarterDeckConfig = [
       {
         type: "heal",
         amount: 2,
-      },
-    ],
-  },
-  {
-    name: "Drain Color",
-    type: "spell",
-    cost: 2,
-    text: "Deal 3 damage to an enemy minion. Restore 2 Health.",
-    effects: [
-      {
-        type: "damage",
-        target: "enemyMinion",
-        amount: 3,
-      },
-      {
-        type: "heal",
-        amount: 2,
-      },
-    ],
-  },
-  {
-    name: "Fade Away",
-    type: "spell",
-    cost: 3,
-    text: "Deal 4 damage to an enemy minion and 1 damage to the enemy hero.",
-    effects: [
-      {
-        type: "damage",
-        target: "enemyMinion",
-        amount: 4,
-      },
-      {
-        type: "damage",
-        amount: 1,
       },
     ],
   },
@@ -665,7 +532,6 @@ enemyStarterDeckConfig = [
   },
   {
     name: "Color Bully",
-    type: "minion",
     cost: 5,
     attack: 5,
     health: 6,
@@ -698,4 +564,9 @@ enemyStarterDeckConfig = [
       },
     ],
   },
+];
+
+enemyStarterDeckConfig = [
+  ...enemyDeckCards.slice(0, 9).flatMap((card) => [card, card]),
+  ...enemyDeckCards.slice(9),
 ];
