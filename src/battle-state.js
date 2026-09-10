@@ -26,8 +26,8 @@ class BattleState {
     this.pendingMinionDeaths = [];
     this.turn = 1;
     this.turnOwner = "player";
-    this.player.setDeck(createDeckFromConfig(this.playerDeckConfig));
-    this.enemy.setDeck(createDeckFromConfig(enemyStarterDeckConfig));
+    this.player.deck = createDeckFromConfig(this.playerDeckConfig);
+    this.enemy.deck = createDeckFromConfig(enemyStarterDeckConfig);
     shuffle(this.player.deck);
     shuffle(this.enemy.deck);
     this.player.resetBattleState();
@@ -72,23 +72,23 @@ class BattleState {
   }
 
   isAnimating() {
-    const cards = [
-      ...this.player.hand,
-      ...this.player.board,
-      ...this.enemy.board,
-    ];
-
     return (
       this.turnOwner === "enemy" ||
       this.enemyPreviewTimer > 0 ||
       this.pendingMinionDeaths.length > 0 ||
-      cards.some(
-        (card) =>
-          card.isDrawing() ||
-          card.attackEffectTime > 0 ||
-          card.hitEffectTime > 0 ||
-          card.deathEffectTime > 0,
-      )
+      this.hasAnimatingCards(this.player.hand) ||
+      this.hasAnimatingCards(this.player.board) ||
+      this.hasAnimatingCards(this.enemy.board)
+    );
+  }
+
+  hasAnimatingCards(cards) {
+    return cards.some(
+      (card) =>
+        card.isDrawing() ||
+        card.attackEffectTime > 0 ||
+        card.hitEffectTime > 0 ||
+        card.deathEffectTime > 0,
     );
   }
 
@@ -161,7 +161,7 @@ class BattleState {
     }
   }
 
-  canUseCard(player, opponent, card) {
+  canUseCard(player, card) {
     if (this.ended) return { ok: false, reason: "Battle is over" };
     if (this.mulliganActive) {
       return { ok: false, reason: "Complete the mulligan first" };
@@ -182,11 +182,11 @@ class BattleState {
       return { ok: false, reason: "You can only play on your turn" };
     }
 
-    return this.canUseCard(player, this.enemy, card);
+    return this.canUseCard(player, card);
   }
 
   canEnemyPlayCard(player, opponent, card) {
-    const playCheck = this.canUseCard(player, opponent, card);
+    const playCheck = this.canUseCard(player, card);
 
     if (!playCheck.ok) return false;
     return this.hasPlayableCardTargets(card, player, opponent);
@@ -204,7 +204,7 @@ class BattleState {
   }
 
   playEnemyCard(player, opponent, card, target = null) {
-    const playCheck = this.canUseCard(player, opponent, card);
+    const playCheck = this.canUseCard(player, card);
 
     if (!playCheck.ok) return false;
     return this.performCardPlay(player, opponent, card, target);
@@ -616,28 +616,5 @@ class BattleState {
   }
 }
 
-function createDeckFromConfig(deckConfig) {
-  const deck = [];
-
-  deckConfig.forEach((cardConfig) => {
-    deck.push(
-      new Card(
-        0,
-        0,
-        CARD_WIDTH,
-        CARD_HEIGHT,
-        cardConfig.name,
-        cardConfig.type || "minion",
-        cardConfig.cost || 0,
-        cardConfig.health ?? 0,
-        cardConfig.attack ?? 0,
-        (cardConfig.effects || []).map((effect) => ({ ...effect })),
-        cardConfig.text || "",
-        !!cardConfig.unique,
-        inferCardTheme(cardConfig),
-      ),
-    );
-  });
-
-  return deck;
-}
+createDeckFromConfig = (deckConfig) =>
+  deckConfig.map((config) => createCardFromConfig(config));

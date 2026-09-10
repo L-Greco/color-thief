@@ -79,10 +79,7 @@ class Enemy extends Player {
 
     if (!playableCards.length) return null;
 
-    playableCards.sort((a, b) => {
-      if (b.cost !== a.cost) return b.cost - a.cost;
-      return a.name.localeCompare(b.name);
-    });
+    playableCards.sort((a, b) => b.cost - a.cost || a.name.localeCompare(b.name));
 
     return playableCards[0];
   }

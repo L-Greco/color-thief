@@ -56,8 +56,6 @@ class Card {
     this.unique = unique;
     this.theme = theme;
     this.canAttack = false;
-    this.hasAttacked = false;
-    this.faceDown = false;
   }
 
   setPosition(x, y) {
@@ -77,19 +75,16 @@ class Card {
 
   summon() {
     this.canAttack = false;
-    this.hasAttacked = false;
   }
 
   readyForTurn() {
     if (this.type !== "minion") return;
     this.canAttack = true;
-    this.hasAttacked = false;
   }
 
   exhaust() {
     if (this.type !== "minion") return;
     this.canAttack = false;
-    this.hasAttacked = true;
   }
 
   triggerHitEffect() {
@@ -130,7 +125,6 @@ class Card {
   triggerDeathEffect() {
     this.isDying = true;
     this.canAttack = false;
-    this.hasAttacked = true;
     this.attackEffectTime = 0;
     this.attackRotation = 0;
     this.attackScaleBoost = 0;
@@ -256,11 +250,6 @@ class Card {
     );
     ctx.translate(-centerX, -centerY);
 
-    if (this.faceDown) {
-      this.drawCardBack();
-      return;
-    }
-
     const palette = this.getPalette();
     const artRect = this.getArtRect();
     const effectRect = this.getEffectRect();
@@ -364,7 +353,7 @@ class Card {
     ctx.font = "bold 10px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    this.drawClampedText(
+    drawWrappedText(
       this.name,
       this.x + 12,
       this.y + 13,
@@ -407,11 +396,9 @@ class Card {
       return;
     }
 
-    const image = this.getArtImage();
-
-    if (image && image.complete) {
+    if (spellIconSheet.complete) {
       ctx.imageSmoothingEnabled = false;
-      this.drawContainedImage(image, rect, this.type === "spell" ? 0.68 : 0.82);
+      this.drawSpellIcon(rect);
       ctx.imageSmoothingEnabled = true;
     }
   }
@@ -429,7 +416,7 @@ class Card {
     ctx.font = "8px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    this.drawClampedText(
+    drawWrappedText(
       this.effectLabel(),
       rect.x + 4,
       rect.y + 4,
@@ -551,22 +538,6 @@ class Card {
     };
   }
 
-  getArtImage() {
-    if (this.type === "spell") {
-      return this.getSpellIconImage();
-    }
-
-    if (this.unique && this.theme === "unicorn") {
-      return cardArtImages.unicornUnique || cardArtImages.unicorn || null;
-    }
-
-    return cardArtImages[this.theme] || cardArtImages.unicorn || null;
-  }
-
-  getSpellIconImage() {
-    return spellIconSheet;
-  }
-
   getSpellIconFrame() {
     const iconKey = this.getBadgeIconKey() || "support";
     return spellIconFrames[iconKey];
@@ -582,35 +553,23 @@ class Card {
     return "support";
   }
 
-  drawContainedImage(image, rect, scale = 1) {
-    if (this.type === "spell") {
-      const frame = this.getSpellIconFrame();
-      const size = Math.min(rect.width, rect.height) * scale;
-      const dx = rect.x + (rect.width - size) / 2;
-      const dy = rect.y + (rect.height - size) / 2;
+  drawSpellIcon(rect) {
+    const frame = this.getSpellIconFrame();
+    const size = Math.min(rect.width, rect.height) * 0.68;
+    const dx = rect.x + (rect.width - size) / 2;
+    const dy = rect.y + (rect.height - size) / 2;
 
-      ctx.drawImage(
-        image,
-        frame.x,
-        frame.y,
-        frame.width,
-        frame.height,
-        dx,
-        dy,
-        size,
-        size,
-      );
-      return;
-    }
-
-    const ratio =
-      Math.min(rect.width / image.width, rect.height / image.height) * scale;
-    const drawWidth = image.width * ratio;
-    const drawHeight = image.height * ratio;
-    const dx = rect.x + (rect.width - drawWidth) / 2;
-    const dy = rect.y + (rect.height - drawHeight) / 2;
-
-    ctx.drawImage(image, dx, dy, drawWidth, drawHeight);
+    ctx.drawImage(
+      spellIconSheet,
+      frame.x,
+      frame.y,
+      frame.width,
+      frame.height,
+      dx,
+      dy,
+      size,
+      size,
+    );
   }
 
   effectLabel() {
@@ -638,32 +597,6 @@ class Card {
     if (effect.type === "buff") return "Buff";
     if (effect.type === "returnToHand") return "Bounce";
     return this.type;
-  }
-
-  drawClampedText(text, x, y, maxWidth, lineHeight, maxLines = 2) {
-    const words = text.split(" ");
-    const lines = [];
-    let currentLine = "";
-
-    words.forEach((word) => {
-      const nextLine = currentLine ? `${currentLine} ${word}` : word;
-
-      if (ctx.measureText(nextLine).width <= maxWidth || !currentLine) {
-        currentLine = nextLine;
-        return;
-      }
-
-      lines.push(currentLine);
-      currentLine = word;
-    });
-
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    lines.slice(0, maxLines).forEach((line, index) => {
-      ctx.fillText(line, x, y + index * lineHeight);
-    });
   }
 
   getPalette() {
@@ -705,30 +638,21 @@ class Card {
     };
   }
 
-  drawCardBack() {
-    ctx.fillStyle = "#2c2142";
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.strokeStyle = "#120b1e";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
-    ctx.fillStyle = "#5f4ca6";
-    ctx.fillRect(this.x + 10, this.y + 10, this.width - 20, this.height - 20);
-    ctx.strokeStyle = "#ede6ff";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(this.x + 16, this.y + 16, this.width - 32, this.height - 32);
-    ctx.fillStyle = "#ede6ff";
-    ctx.font = "bold 14px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(
-      "COLOR",
-      this.x + this.width / 2,
-      this.y + this.height / 2 - 12,
-    );
-    ctx.fillText(
-      "THIEF",
-      this.x + this.width / 2,
-      this.y + this.height / 2 + 12,
-    );
-  }
 }
+
+createCardFromConfig = (config, x = 0, y = 0) =>
+  new Card(
+    x,
+    y,
+    CARD_WIDTH,
+    CARD_HEIGHT,
+    config.name,
+    config.type || "minion",
+    config.cost || 0,
+    config.health ?? 0,
+    config.attack ?? 0,
+    (config.effects || []).map((effect) => ({ ...effect })),
+    config.text || "",
+    !!config.unique,
+    inferCardTheme(config),
+  );

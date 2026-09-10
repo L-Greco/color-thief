@@ -39,19 +39,25 @@ class BattleScreen {
 
   animateNewPlayerDraws() {
     const playerHand = this.battle.player.hand;
-    const newCards = playerHand.filter(
-      (card) => !this.knownPlayerHandCards.has(card),
-    );
     const startX =
       this.playerDeckRect.x + (this.playerDeckRect.width - CARD_WIDTH) / 2;
     const startY =
       this.playerDeckRect.y + (this.playerDeckRect.height - CARD_HEIGHT) / 2;
+    let drawIndex = 0;
 
-    newCards.forEach((card, index) => {
-      card.triggerDrawEffect(startX, startY, index * CARD_DRAW_EFFECT_STAGGER);
+    playerHand.forEach((card) => {
+      if (this.knownPlayerHandCards.has(card)) return;
+
+      card.triggerDrawEffect(
+        startX,
+        startY,
+        drawIndex * CARD_DRAW_EFFECT_STAGGER,
+      );
+      drawIndex += 1;
     });
 
-    this.knownPlayerHandCards = new Set(playerHand);
+    this.knownPlayerHandCards.clear();
+    playerHand.forEach((card) => this.knownPlayerHandCards.add(card));
   }
 
   createDeckRect(zone) {
@@ -161,10 +167,6 @@ class BattleScreen {
 
     if (this.battle.isMulliganActive()) {
       this.drawMulligan();
-    }
-
-    if (DEBUG_BORDERS) {
-      drawBattleDebugBorders();
     }
 
     this.drawEnemyPreview();
@@ -287,15 +289,10 @@ class BattleScreen {
     const accentColor = isColorThief ? "#25102e" : "#0d5874";
     const iconCenterColor = isColorThief ? "#6a187c" : "#147596";
     const iconEdgeColor = isColorThief ? "#13091a" : "#063044";
-    const iconCenters = isColorThief
-      ? [
-          { x: x + 28, y: y + 28 },
-          { x: x + 92, y: y + 140 },
-        ]
-      : [
-          { x: x + 28, y: y + 28 },
-          { x: x + 92, y: y + 140 },
-        ];
+    const iconCenters = [
+      { x: x + 28, y: y + 28 },
+      { x: x + 92, y: y + 140 },
+    ];
     const background = ctx.createLinearGradient(x, y, x + width, y + height);
 
     background.addColorStop(0, outerColor);
@@ -503,39 +500,14 @@ class BattleScreen {
       ctx.fillText(card.name, x + 116, y + 30);
 
       ctx.font = "15px Arial";
-      this.drawPreviewText(
+      drawWrappedText(
         card.text || card.effectLabel(),
         x + 24,
         y + 64,
         272,
         20,
+        3,
       );
-    });
-  }
-
-  drawPreviewText(text, x, y, maxWidth, lineHeight, maxLines = 3) {
-    const words = text.split(" ");
-    const lines = [];
-    let currentLine = "";
-
-    words.forEach((word) => {
-      const nextLine = currentLine ? `${currentLine} ${word}` : word;
-
-      if (ctx.measureText(nextLine).width <= maxWidth || !currentLine) {
-        currentLine = nextLine;
-        return;
-      }
-
-      lines.push(currentLine);
-      currentLine = word;
-    });
-
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    lines.slice(0, maxLines).forEach((line, index) => {
-      ctx.fillText(line, x, y + index * lineHeight);
     });
   }
 
@@ -585,16 +557,7 @@ class BattleScreen {
   }
 
   getTargetRect(target) {
-    if (target.kind === "hero") {
-      return target.rect;
-    }
-
-    return {
-      x: target.x,
-      y: target.y,
-      width: target.width,
-      height: target.height,
-    };
+    return target.kind === "hero" ? target.rect : target;
   }
 
   drawTurnPanel() {
@@ -661,7 +624,7 @@ class BattleScreen {
       ctx.fillStyle = "#cbd7ef";
       ctx.font = "14px Arial";
       ctx.textAlign = "left";
-      this.drawPreviewText(
+      drawWrappedText(
         state.message,
         rect.x + 28,
         rect.y + 59,
@@ -773,22 +736,6 @@ class BattleScreen {
 
     if (this.selectedAction) {
       return this.handleTargetModeClick(point);
-    }
-
-    if (
-      this.canManuallyDrawFromDeck() &&
-      pointCollision(this.playerDeckRect, point)
-    ) {
-      this.battle.drawCardForPlayer();
-      return true;
-    }
-
-    if (
-      this.canManuallyDrawFromDeck() &&
-      pointCollision(this.enemyDeckRect, point)
-    ) {
-      this.battle.drawCardForEnemy();
-      return true;
     }
 
     const boardMinion = this.findHoveredPlayerBoardMinion(point);
@@ -947,7 +894,12 @@ class BattleScreen {
 
     const card = this.dragCard;
     const droppedOnPlayerBoard = pointCollision(
-      rectFromZone(BATTLE_LAYOUT.playerBoard),
+      {
+        x: BATTLE_LAYOUT.playerBoard[0],
+        y: BATTLE_LAYOUT.playerBoard[1],
+        width: BATTLE_LAYOUT.playerBoard[2],
+        height: BATTLE_LAYOUT.playerBoard[3],
+      },
       point,
     );
 
@@ -1024,12 +976,6 @@ class BattleScreen {
     return this.canDragHandCard(card) || this.canStartCardTargetSelection(card);
   }
 
-  canManuallyDrawFromDeck() {
-    return (
-      typeof debugConfig !== "undefined" && debugConfig.allowManualDeckDraw
-    );
-  }
-
   getActionTargets() {
     if (!this.selectedAction) return [];
     if (this.selectedAction.targetType === "friendlyMinion") {
@@ -1064,15 +1010,7 @@ class BattleScreen {
   }
 
   isPointOnCard(point, card) {
-    return pointCollision(
-      {
-        x: card.x,
-        y: card.y,
-        width: card.width,
-        height: card.height,
-      },
-      point,
-    );
+    return pointCollision(card, point);
   }
 
   isPointOnTarget(point, target) {

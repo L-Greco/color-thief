@@ -206,31 +206,7 @@ class GameInfoModal {
 
     ctx.fillStyle = "#d3dcf3";
     ctx.font = "16px Arial";
-    this.drawWrappedText(description, x + 32, y + 23, 360, 21);
-  }
-
-  drawWrappedText(text, x, y, maxWidth, lineHeight) {
-    const words = text.split(" ");
-    const lines = [];
-    let line = "";
-
-    words.forEach((word) => {
-      const nextLine = line ? `${line} ${word}` : word;
-
-      if (ctx.measureText(nextLine).width <= maxWidth || !line) {
-        line = nextLine;
-        return;
-      }
-
-      lines.push(line);
-      line = word;
-    });
-
-    if (line) lines.push(line);
-
-    lines.slice(0, 3).forEach((wrappedLine, index) => {
-      ctx.fillText(wrappedLine, x, y + index * lineHeight);
-    });
+    drawWrappedText(description, x + 32, y + 23, 360, 21, 3);
   }
 
   drawFooter(panel) {

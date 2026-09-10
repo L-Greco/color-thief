@@ -18,33 +18,25 @@ class Game {
     this.gameInfoModal = new GameInfoModal();
   }
 
-  setState(newState) {
-    this.state = newState;
-  }
-
-  setScreen(screen) {
-    this.screen = screen;
-  }
-
   startBeginning() {
     this.closeGameInfo();
     this.state = states.starting;
     this.battle = null;
-    this.setScreen(new StartingScreen(this));
+    this.screen = new StartingScreen(this);
   }
 
   startIntro() {
     this.closeGameInfo();
     this.state = states.intro;
     this.battle = null;
-    this.setScreen(new IntroScreen(this));
+    this.screen = new IntroScreen(this);
   }
 
   startDeckBuilding() {
     this.closeGameInfo();
     this.state = states.deckBuilding;
     this.battle = null;
-    this.setScreen(new DeckBuildingScreen(this));
+    this.screen = new DeckBuildingScreen(this);
   }
 
   startBattle(playerDeckConfig) {
@@ -57,14 +49,14 @@ class Game {
       playerDeckConfig,
     );
     this.battle.start();
-    this.setScreen(new BattleScreen(this.battle));
+    this.screen = new BattleScreen(this.battle);
   }
 
   showGameOver(outcome) {
     this.closeGameInfo();
     this.state = states.gameOver;
     this.battle = null;
-    this.setScreen(new GameOverScreen(this, outcome));
+    this.screen = new GameOverScreen(this, outcome);
   }
 
   canShowGameInfo() {

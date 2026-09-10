@@ -251,15 +251,4 @@ class IntroScreen {
     return true;
   }
 
-  handlePointerDown() {}
-
-  handlePointerMove() {}
-
-  handlePointerUp() {
-    return false;
-  }
-
-  handleClick() {
-    return false;
-  }
 }

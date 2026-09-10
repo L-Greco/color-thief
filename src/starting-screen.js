@@ -51,17 +51,4 @@ class StartingScreen {
     return true;
   }
 
-  handlePointerDown() {
-    return false;
-  }
-
-  handlePointerMove() {}
-
-  handlePointerUp() {
-    return false;
-  }
-
-  handleClick() {
-    return false;
-  }
 }

@@ -22,10 +22,6 @@ class Player {
     this.board = [];
   }
 
-  setDeck(deck) {
-    this.deck = deck;
-  }
-
   canDrawCard() {
     return this.hand.length < HAND_LIMIT;
   }
@@ -71,9 +67,6 @@ class Player {
 
     this.mana -= amount;
     return true;
-  }
-  addMana(amount) {
-    this.maxMana += amount;
   }
   refillMana() {
     this.mana = this.maxMana;

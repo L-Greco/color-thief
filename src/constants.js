@@ -1,6 +1,5 @@
 CARD_WIDTH = 120;
 CARD_HEIGHT = 168;
-DEBUG_BORDERS = false;
 
 // Game rules
 STARTING_HAND_SIZE = 4;

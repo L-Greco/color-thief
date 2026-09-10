@@ -1,3 +1,10 @@
+VICTORY_LORE_LINES = [
+  "The Color Thief returns to his grey planet.",
+  "He holds a small Rainbow Crystal.",
+  "He places it on the ground.",
+  "A tiny flower turns red.",
+];
+
 class GameOverScreen {
   constructor(game, outcome) {
     this.game = game;
@@ -111,15 +118,6 @@ class GameOverScreen {
     return max(0, this.victoryTime - VICTORY_COLOR_RESTORE_DURATION);
   }
 
-  getVictoryLoreLines() {
-    return [
-      "The Color Thief returns to his grey planet.",
-      "He holds a small Rainbow Crystal.",
-      "He places it on the ground.",
-      "A tiny flower turns red.",
-    ];
-  }
-
   getLoreLineProgress(index) {
     const startTime = index * VICTORY_LORE_LINE_STAGGER;
     return min(
@@ -132,7 +130,7 @@ class GameOverScreen {
   }
 
   getTheEndProgress() {
-    const lineCount = this.getVictoryLoreLines().length;
+    const lineCount = VICTORY_LORE_LINES.length;
     const fadeStart =
       (lineCount - 1) * VICTORY_LORE_LINE_STAGGER +
       VICTORY_LORE_LINE_ENTER_DURATION +
@@ -145,11 +143,9 @@ class GameOverScreen {
   }
 
   drawVictoryEnding() {
-    const lines = this.getVictoryLoreLines();
-
     ctx.fillStyle = "#f8f6e9";
     ctx.font = "bold 27px Georgia";
-    lines.forEach((line, index) => {
+    VICTORY_LORE_LINES.forEach((line, index) => {
       const progress = this.getLoreLineProgress(index);
       if (progress === 0) return;
 
@@ -188,14 +184,6 @@ class GameOverScreen {
       this.startVictoryTheme();
     }
 
-    return false;
-  }
-
-  handlePointerMove() {
-    return false;
-  }
-
-  handlePointerUp() {
     return false;
   }
 

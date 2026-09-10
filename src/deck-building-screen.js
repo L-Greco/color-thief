@@ -2,6 +2,7 @@ class DeckBuildingScreen {
   constructor(game) {
     this.game = game;
     this.selectedSource = playerDeckSources[0];
+    this.sortedSourceCards = [...this.selectedSource.cards].sort(compareCardsByCost);
     this.selectedDeck = [];
     this.sourceDeckButtons = this.createSourceDeckButtons();
     this.sourceCardsPage = 0;
@@ -169,9 +170,7 @@ class DeckBuildingScreen {
     ctx.fillStyle = "#fff";
     ctx.fillText(`${this.selectedDeck.length}/${DECK_SIZE}`, 1140, 78);
 
-    const sortedDeck = [...this.selectedDeck].sort(
-      (a, b) => a.cost - b.cost || a.name.localeCompare(b.name),
-    );
+    const sortedDeck = this.getSortedDeck();
 
     sortedDeck.forEach((cardConfig, index) => {
       const y = 120 + index * 24;
@@ -238,22 +237,7 @@ class DeckBuildingScreen {
   }
 
   createPreviewCard(cardConfig, x, y) {
-    const card = new Card(
-      x,
-      y,
-      CARD_WIDTH,
-      CARD_HEIGHT,
-      cardConfig.name,
-      cardConfig.type,
-      cardConfig.cost,
-      cardConfig.health ?? 0,
-      cardConfig.attack ?? 0,
-      (cardConfig.effects || []).map((effect) => ({ ...effect })),
-      cardConfig.text || "",
-      !!cardConfig.unique,
-      inferCardTheme(cardConfig),
-    );
-
+    const card = createCardFromConfig(cardConfig, x, y);
     card.hoverDuration = 0.12;
     return card;
   }
@@ -325,9 +309,7 @@ class DeckBuildingScreen {
   }
 
   findHoveredDeckEntry() {
-    const sortedDeck = [...this.selectedDeck].sort(
-      (a, b) => a.cost - b.cost || a.name.localeCompare(b.name),
-    );
+    const sortedDeck = this.getSortedDeck();
 
     for (let i = 0; i < sortedDeck.length; i += 1) {
       const rect = { x: 870, y: 120 + i * 24, width: 330, height: 20 };
@@ -340,24 +322,13 @@ class DeckBuildingScreen {
     return null;
   }
 
-  handlePointerDown() {
-    return false;
-  }
-
-  handlePointerMove() {
-    return false;
-  }
-
-  handlePointerUp() {
-    return false;
-  }
-
   handleClick(point) {
     for (let i = 0; i < this.sourceDeckButtons.length; i += 1) {
       const button = this.sourceDeckButtons[i];
 
       if (pointCollision(button.rect, point)) {
         this.selectedSource = button.source;
+        this.sortedSourceCards = [...button.source.cards].sort(compareCardsByCost);
         this.sourceCardsPage = 0;
         return true;
       }
@@ -406,18 +377,16 @@ class DeckBuildingScreen {
     return false;
   }
 
-  getSortedSourceCards() {
-    return [...this.selectedSource.cards].sort(
-      (a, b) => a.cost - b.cost || a.name.localeCompare(b.name),
-    );
+  getSortedDeck() {
+    return [...this.selectedDeck].sort(compareCardsByCost);
   }
 
   getVisibleSourceCards() {
     const start = this.sourceCardsPage * this.cardsPerPage;
-    return this.getSortedSourceCards().slice(start, start + this.cardsPerPage);
+    return this.sortedSourceCards.slice(start, start + this.cardsPerPage);
   }
 
   getSourceCardsTotalPages() {
-    return max(1, ceil(this.getSortedSourceCards().length / this.cardsPerPage));
+    return max(1, ceil(this.sortedSourceCards.length / this.cardsPerPage));
   }
 }

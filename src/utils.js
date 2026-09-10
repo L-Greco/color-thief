@@ -9,13 +9,28 @@ pointCollision = (rect, point) => {
     point.y <= rect.y + rect.height
   );
 };
-rectFromZone = (zone) => {
-  return {
-    x: zone[0],
-    y: zone[1],
-    width: zone[2],
-    height: zone[3],
-  };
+compareCardsByCost = (a, b) => a.cost - b.cost || a.name.localeCompare(b.name);
+
+drawWrappedText = (text, x, y, maxWidth, lineHeight, maxLines = 2) => {
+  const lines = [];
+  let line = "";
+
+  text.split(" ").forEach((word) => {
+    const nextLine = line ? `${line} ${word}` : word;
+
+    if (ctx.measureText(nextLine).width <= maxWidth || !line) {
+      line = nextLine;
+      return;
+    }
+
+    lines.push(line);
+    line = word;
+  });
+
+  if (line) lines.push(line);
+  lines.slice(0, maxLines).forEach((line, index) => {
+    ctx.fillText(line, x, y + index * lineHeight);
+  });
 };
 
 shuffle = (cards) => {

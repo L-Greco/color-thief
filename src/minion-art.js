@@ -1,4 +1,4 @@
-createMinionGradient = (spX, spY, startColor, endColor) => {
+createMinionGradient = (spX, spY) => {
   const gradient = ctx.createLinearGradient(
     spX - 30,
     spY + 29,
@@ -7,7 +7,6 @@ createMinionGradient = (spX, spY, startColor, endColor) => {
   );
   gradient.addColorStop(0, "#ffffff");
   gradient.addColorStop(1, "#6e6e6e");
-  // gradient.addColorStop(1, endColor);
   return gradient;
 };
 
@@ -93,7 +92,7 @@ class UnicornMinionArt {
         ? createUnicornRestorationGradient(spX, spY, restorationProgress)
         : isUnique
           ? this.createUniqueGradient(spX, spY)
-          : createMinionGradient(spX, spY, "#d4d8dc", "#fce8ae");
+          : createMinionGradient(spX, spY);
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -243,7 +242,7 @@ class RainbowFairyMinionArt {
     ctx.fillStyle =
       typeof restorationProgress === "number"
         ? createFairyRestorationGradient(spX, spY, restorationProgress)
-        : createMinionGradient(spX, spY, "#ffffff", "#6e6e6e");
+        : createMinionGradient(spX, spY);
     ctx.beginPath();
     ctx.moveTo(spX, spY);
     ctx.bezierCurveTo(
