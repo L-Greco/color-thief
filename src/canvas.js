@@ -264,12 +264,12 @@ drawStar = (x, y, scale = 1) => {
   const spX = 32;
   const spY = 48;
   const starScale = 1.4;
-  const centerX = spX + 0.14;
-  const centerY = spY - 0.18;
-  const topY = spY - 18.57;
-  const rightX = spX + 17.97;
-  const bottomY = spY + 18.54;
-  const leftX = spX - 18.17;
+  const centerX = spX;
+  const centerY = spY;
+  const topY = spY - 19;
+  const rightX = spX + 18;
+  const bottomY = spY + 19;
+  const leftX = spX - 18;
 
   ctx.save();
   ctx.translate(x - centerX * scale, y - centerY * scale);
@@ -295,16 +295,16 @@ drawStar = (x, y, scale = 1) => {
   ctx.closePath();
   ctx.fill();
 
-  drawX(spX + 11.23, spY + 12.97, 0.5, "#f58b04");
-  drawX(spX - 11.38, spY + 12.97, 0.5, "#f58b04");
-  drawX(spX + 11.06, spY - 13.3, 0.5, "#f58b04");
-  drawX(spX - 11.38, spY - 13.3, 0.5, "#f58b04");
+  drawX(spX + 11, spY + 13, 0.5, "#f58b04");
+  drawX(spX - 11, spY + 13, 0.5, "#f58b04");
+  drawX(spX + 11, spY - 13, 0.5, "#f58b04");
+  drawX(spX - 11, spY - 13, 0.5, "#f58b04");
 
   ctx.fillStyle = "#f58b04";
-  ctx.fillRect(spX + 13.54, spY + 6.24, -1.65, -1.65);
-  ctx.fillRect(spX - 13.86, spY + 5.42, -1.65, -1.65);
-  ctx.fillRect(spX - 14.19, spY - 6.57, -1.65, -1.65);
-  ctx.fillRect(spX + 14.36, spY - 6.4, -1.65, -1.65);
+  ctx.fillRect(spX + 14, spY + 6, -2, -2);
+  ctx.fillRect(spX - 14, spY + 5, -2, -2);
+  ctx.fillRect(spX - 14, spY - 7, -2, -2);
+  ctx.fillRect(spX + 14, spY - 6, -2, -2);
   ctx.restore();
 };
 
