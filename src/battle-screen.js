@@ -135,7 +135,7 @@ class BattleScreen {
 
       const isMouseOver =
         interactive &&
-        (interactive === true || interactive(card)) &&
+        interactive(card) &&
         this.isPointOnCard(mousePosition, card);
 
       card.setHover(isMouseOver);

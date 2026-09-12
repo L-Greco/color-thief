@@ -7,7 +7,6 @@ import {
   EVALUATE,
   NOMANGLE,
   assembleHtml,
-  hardcodeConstants,
   logFileSize,
   macro,
   mangle,
@@ -17,6 +16,11 @@ import { minify as minifyHtml } from "html-minifier";
 import { Packer } from "roadroller";
 import { minify } from "terser";
 import yargs from "yargs/yargs";
+import {
+  BUILD_CONSTANTS,
+  LITERAL_TRANSFORMS,
+  runtimeConstantsSource,
+} from "./build-constants.mjs";
 import { SOURCE_FILES } from "./source-files.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -27,13 +31,6 @@ const EFFECT_TARGETS = [
   "allFriendlyMinions",
   "allEnemyMinions",
 ];
-const LITERAL_CONSTANTS = {
-  true: 1,
-  false: 0,
-  const: "let",
-  null: 0,
-  Infinity: 999,
-};
 const MANGLE_OPTIONS = {
   skip: [
     "constructor", "repeat", "roundRect", "zzfx", "zzfxV", "zzfxX",
@@ -128,39 +125,68 @@ async function readSource(debug) {
   const files = debug ? [...SOURCE_FILES, "src/debug.js"] : SOURCE_FILES;
   const parts = await Promise.all(
     files.map(async (file) => {
-      if (!debug && file === "src/constants.js") return "";
       if (!debug && file === "src/collection.js") return compactCollection();
       const source = await fs.readFile(join(ROOT, file), "utf8");
       return source;
     }),
   );
-  return parts.join("\n");
+  return `${debug ? `${runtimeConstantsSource()}\n` : ""}${parts.join("\n")}`;
 }
 
-async function readConstants() {
-  const constants = {};
-  const collection = {};
-  runInNewContext(
-    await fs.readFile(join(ROOT, "src/constants.js"), "utf8"),
-    constants,
-  );
-  runInNewContext(
-    await fs.readFile(join(ROOT, "src/collection.js"), "utf8"),
-    collection,
-  );
-  return {
-    ...LITERAL_CONSTANTS,
-    ...Object.fromEntries(
-      [
-        ...Object.entries(constants),
-        ["DECK_SIZE", collection.DECK_SIZE],
-        ["DEFAULT_DECK_COPIES", collection.DEFAULT_DECK_COPIES],
-      ].map(([name, value]) => [
-        name,
-        value && typeof value === "object" ? JSON.stringify(value) : value,
-      ]),
-    ),
-  };
+function inlineConstants(source, constants) {
+  let result = "";
+
+  for (let index = 0; index < source.length;) {
+    const character = source[index];
+
+    if (character === "'" || character === '"') {
+      const quote = character;
+      let end = index + 1;
+
+      while (end < source.length) {
+        if (source[end] === "\\") end += 2;
+        else if (source[end++] === quote) break;
+      }
+      result += source.slice(index, end);
+      index = end;
+      continue;
+    }
+
+    if (character === "/" && source[index + 1] === "/") {
+      const end = source.indexOf("\n", index);
+      result += source.slice(index, end < 0 ? source.length : end);
+      index = end < 0 ? source.length : end;
+      continue;
+    }
+
+    if (character === "/" && source[index + 1] === "*") {
+      const end = source.indexOf("*/", index + 2) + 2;
+      result += source.slice(index, end);
+      index = end;
+      continue;
+    }
+
+    if (!/[A-Za-z_$]/.test(character)) {
+      result += character;
+      index += 1;
+      continue;
+    }
+
+    let end = index + 1;
+    while (end < source.length && /[A-Za-z0-9_$]/.test(source[end])) end += 1;
+    const name = source.slice(index, end);
+    const before = source.slice(0, index).trimEnd().at(-1);
+    const after = source.slice(end).trimStart()[0];
+    const value = Object.hasOwn(constants, name) ? constants[name] : undefined;
+
+    result +=
+      value === undefined || before === "." || after === ":"
+        ? name
+        : typeof value === "string" ? value : JSON.stringify(value);
+    index = end;
+  }
+
+  return result;
 }
 
 function expandTemplates(source) {
@@ -189,6 +215,11 @@ function wrapSource(source) {
   return `(()=>{let ${[...new Set(names)]};${source}})();`;
 }
 
+async function logSize(label, value) {
+  const size = typeof value === "number" ? value : (await fs.stat(value)).size;
+  console.log(`${label}: ${size} bytes`);
+}
+
 async function pack(source, level) {
   const packer = new Packer([{ data: source, type: "js", action: "eval" }], {
     allowFreeVars: true,
@@ -213,10 +244,10 @@ async function build() {
       html = html.replace(canvas, "CANVAS_INJECTION_SITE");
     }
     javascript = compactEffectAccess(javascript);
-    javascript = hardcodeConstants(
-      expandTemplates(javascript),
-      await readConstants(),
-    );
+    javascript = inlineConstants(expandTemplates(javascript), {
+      ...BUILD_CONSTANTS,
+      ...LITERAL_TRANSFORMS,
+    });
     javascript = macro(macro(javascript, NOMANGLE), EVALUATE);
     javascript = mangle(protectLiterals(javascript), MANGLE_OPTIONS);
     javascript = (
@@ -227,6 +258,7 @@ async function build() {
         format: { comments: false },
       })
     ).code;
+    await logSize("Terser", Buffer.byteLength(javascript));
     css = new CleanCSS().minify(css).styles;
     html = minifyHtml(html, {
       collapseWhitespace: true,
@@ -236,6 +268,7 @@ async function build() {
 
     if (mode === "prod") {
       javascript = await pack(javascript, argv["roadroll-level"] || 3);
+      await logSize("Roadroller", Buffer.byteLength(javascript));
     }
   }
 
@@ -252,6 +285,7 @@ async function build() {
   execFileSync("zip", ["-q", "-9", "-X", "color-thief.zip", "index.html"], {
     cwd: output,
   });
+  await logSize("ZIP", archive);
   await logFileSize(archive, 13 * 1024);
 
   if (mode === "prod") {
@@ -264,9 +298,11 @@ async function build() {
       : "advzip";
     console.log("Running advzip...");
     execFileSync(advzip, ["-z", archive, "--shrink-insane"]);
+    await logSize("ADVZIP", archive);
     await logFileSize(archive, 13 * 1024);
     console.log("Running ect...");
     execFileSync(ect, ["-zip", archive, "-10009", "-strip"]);
+    await logSize("ECT", archive);
     await logFileSize(archive, 13 * 1024);
   }
 }

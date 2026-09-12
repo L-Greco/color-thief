@@ -1,5 +1,4 @@
 export const SOURCE_FILES = [
-  "src/constants.js",
   "src/collection.js",
   "src/audio/zzfx.js",
   "src/audio.js",

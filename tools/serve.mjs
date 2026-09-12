@@ -1,6 +1,7 @@
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, normalize, resolve, sep } from "node:path";
+import { runtimeConstantsSource } from "./build-constants.mjs";
 import { SOURCE_FILES } from "./source-files.mjs";
 
 const root = resolve(process.argv[2] || ".");
@@ -39,7 +40,7 @@ createServer((request, response) => {
         .join("\n");
       const page = html
         .replace(cssMarker, readFileSync(resolve(root, "styles.css"), "utf8"))
-        .replace(jsMarker, javascript);
+        .replace(jsMarker, `${runtimeConstantsSource()}\n${javascript}`);
       response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }).end(page);
       return;
     }

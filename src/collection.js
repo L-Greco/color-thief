@@ -1,6 +1,3 @@
-DECK_SIZE = 20;
-DEFAULT_DECK_COPIES = 2;
-
 unicornCards = [
   {
     name: "Tiny Hoof",
