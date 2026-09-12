@@ -1,6 +1,7 @@
 # Logs
 logs
 build/
+.DS_Store
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -44,6 +45,9 @@ jspm_packages/
 
 # Local js13k ZIP optimizer source and build
 /Efficient-Compression-Tool/
+
+# Local visual prototype; it is not part of the runtime game.
+/minion-art-playground/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
