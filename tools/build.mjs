@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import { existsSync, promises as fs } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -320,7 +320,7 @@ async function build() {
     });
 
     if (mode === "prod") {
-      javascript = await pack(javascript, argv["roadroll-level"] || 2);
+      javascript = await pack(javascript, argv["roadroll-level"] || 3);
     }
   }
 
@@ -335,6 +335,20 @@ async function build() {
     cwd: output,
   });
   console.log(`ZIP: ${(await fs.stat(archive)).size} bytes`);
+
+  if (mode === "prod") {
+    const ect = join(ROOT, "Efficient-Compression-Tool", "build", "ect");
+    if (!existsSync(ect)) {
+      throw new Error(`ECT binary is missing: ${ect}`);
+    }
+    const advzip = existsSync("/opt/homebrew/opt/advancecomp/bin/advzip")
+      ? "/opt/homebrew/opt/advancecomp/bin/advzip"
+      : "advzip";
+    execFileSync(advzip, ["-z", archive, "--shrink-insane"]);
+    console.log(`ADVZIP: ${(await fs.stat(archive)).size} bytes`);
+    execFileSync(ect, ["-zip", archive, "-9", "-strip"]);
+    console.log(`ECT: ${(await fs.stat(archive)).size} bytes`);
+  }
 }
 
 await build();

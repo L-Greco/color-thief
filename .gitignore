@@ -42,6 +42,9 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Local js13k ZIP optimizer source and build
+/Efficient-Compression-Tool/
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
