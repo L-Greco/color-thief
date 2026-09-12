@@ -596,9 +596,7 @@ class BattleState {
     if (this.ended) return;
 
     this.ended = true;
-    if (outcome === "defeat") {
-      zzfx(...DEFEAT_SOUND);
-    }
+    zzfx(...(outcome === "victory" ? VICTORY_SOUND : DEFEAT_SOUND));
     this.game.showGameOver(outcome);
   }
 
