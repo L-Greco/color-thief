@@ -35,15 +35,22 @@ const LITERAL_CONSTANTS = {
   Infinity: 999,
 };
 const MANGLE_OPTIONS = {
-  skip: ["constructor", "repeat", "roundRect", "zzfx", "zzfxV", "zzfxX"],
+  skip: [
+    "constructor", "repeat", "roundRect", "zzfx", "zzfxV", "zzfxX",
+    "unicorn", "rainbow", "enemy", "D3", "A4", "Cs5", "D5", "E5", "F5",
+    "enemyStatus", "enemyBoard", "playerBoard", "playerHand", "playerStatus",
+  ],
   force: [],
 };
-const argv = yargs(process.argv.slice(2)).options({
-  debug: { type: "boolean", default: false },
-  mangle: { type: "boolean", default: false },
-  "roadroll-level": { type: "number" },
-}).parseSync();
-const mode = argv._[0] || (argv.debug ? "debug" : argv.mangle ? "mangled" : "prod");
+const argv = yargs(process.argv.slice(2))
+  .options({
+    debug: { type: "boolean", default: false },
+    mangle: { type: "boolean", default: false },
+    "roadroll-level": { type: "number" },
+  })
+  .parseSync();
+const mode =
+  argv._[0] || (argv.debug ? "debug" : argv.mangle ? "mangled" : "prod");
 
 if (!["debug", "mangled", "preprod", "prod"].includes(mode)) {
   throw new Error("Usage: node tools/build.mjs [debug|mangled|preprod|prod]");
@@ -65,12 +72,7 @@ function compactEffect(effect) {
 
 function compactCards(cards) {
   return cards.map((card) => {
-    const compact = [
-      card.name,
-      card.cost,
-      card.attack ?? 0,
-      card.health ?? 0,
-    ];
+    const compact = [card.name, card.cost, card.attack ?? 0, card.health ?? 0];
     if (card.text || card.effects || card.unique) compact.push(card.text || "");
     if (card.effects || card.unique) {
       compact.push(card.effects?.map(compactEffect) || 0);
@@ -88,7 +90,9 @@ async function compactCollection() {
   );
   const unicorns = JSON.stringify(compactCards(collection.unicornCards));
   const rainbows = JSON.stringify(compactCards(collection.rainbowCards));
-  const enemies = JSON.stringify(compactCards(collection.enemyStarterDeckConfig));
+  const enemies = JSON.stringify(
+    compactCards(collection.enemyStarterDeckConfig),
+  );
 
   return `let _c=d=>d.map(c=>{let[n,o,a,h,t,e,u]=c,r={name:n,cost:o};return a?(r.attack=a,r.health=h):r.type="spell",t&&(r.text=t),u&&(r.unique=!0),e&&(r.effects=e),r}),unicornCards=_c(${unicorns}),rainbowCards=_c(${rainbows}),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyStarterDeckConfig=_c(${enemies});`;
 }
@@ -112,7 +116,8 @@ function compactEffectAccess(source) {
   source = source.replace(/effects\[i\]\.target/g, "effects[i][1]");
   source = source.replace(
     /effect\.(target|amount|attack|health)/g,
-    (_, field) => `effect[${{ target: 1, amount: 2, attack: 2, health: 3 }[field]}]`,
+    (_, field) =>
+      `effect[${{ target: 1, amount: 2, attack: 2, health: 3 }[field]}]`,
   );
   source = source.replace(
     /"(friendlyMinion|enemyMinion|allFriendlyMinions|allEnemyMinions)"/g,
@@ -123,12 +128,14 @@ function compactEffectAccess(source) {
 
 async function readSource(debug) {
   const files = debug ? [...SOURCE_FILES, "src/debug.js"] : SOURCE_FILES;
-  const parts = await Promise.all(files.map(async (file) => {
-    if (!debug && file === "src/constants.js") return "";
-    if (!debug && file === "src/collection.js") return compactCollection();
-    const source = await fs.readFile(join(ROOT, file), "utf8");
-    return source;
-  }));
+  const parts = await Promise.all(
+    files.map(async (file) => {
+      if (!debug && file === "src/constants.js") return "";
+      if (!debug && file === "src/collection.js") return compactCollection();
+      const source = await fs.readFile(join(ROOT, file), "utf8");
+      return source;
+    }),
+  );
   return parts.join("\n");
 }
 
@@ -145,23 +152,27 @@ async function readConstants() {
   );
   return {
     ...LITERAL_CONSTANTS,
-    ...Object.fromEntries([
-    ...Object.entries(constants),
-    ["DECK_SIZE", collection.DECK_SIZE],
-    ["DEFAULT_DECK_COPIES", collection.DEFAULT_DECK_COPIES],
-  ].map(([name, value]) => [
-    name,
-    value && typeof value === "object" ? JSON.stringify(value) : value,
-    ])),
+    ...Object.fromEntries(
+      [
+        ...Object.entries(constants),
+        ["DECK_SIZE", collection.DECK_SIZE],
+        ["DEFAULT_DECK_COPIES", collection.DEFAULT_DECK_COPIES],
+      ].map(([name, value]) => [
+        name,
+        value && typeof value === "object" ? JSON.stringify(value) : value,
+      ]),
+    ),
   };
 }
 
 function expandTemplates(source) {
-  return source.replace(
-    /`((?:\\[\s\S]|[^`])*)`/g,
-    (_, content) => content.split(/(\$\{[^}]*\})/).map((part) =>
-      part.startsWith("${") ? `(${part.slice(2, -1)})` : JSON.stringify(part),
-    ).join("+"),
+  return source.replace(/`((?:\\[\s\S]|[^`])*)`/g, (_, content) =>
+    content
+      .split(/(\$\{[^}]*\})/)
+      .map((part) =>
+        part.startsWith("${") ? `(${part.slice(2, -1)})` : JSON.stringify(part),
+      )
+      .join("+"),
   );
 }
 
@@ -181,10 +192,9 @@ function wrapSource(source) {
 }
 
 async function pack(source, level) {
-  const packer = new Packer(
-    [{ data: source, type: "js", action: "eval" }],
-    {},
-  );
+  const packer = new Packer([{ data: source, type: "js", action: "eval" }], {
+    allowFreeVars: true,
+  });
   await packer.optimize(level);
   const { firstLine, secondLine } = packer.makeDecoder();
   return firstLine + secondLine;
@@ -205,15 +215,20 @@ async function build() {
       html = html.replace(canvas, "CANVAS_INJECTION_SITE");
     }
     javascript = compactEffectAccess(javascript);
-    javascript = hardcodeConstants(expandTemplates(javascript), await readConstants());
+    javascript = hardcodeConstants(
+      expandTemplates(javascript),
+      await readConstants(),
+    );
     javascript = macro(macro(javascript, NOMANGLE), EVALUATE);
     javascript = mangle(protectLiterals(javascript), MANGLE_OPTIONS);
-    javascript = (await minify(wrapSource(javascript), {
-      ecma: 2020,
-      compress: { booleans_as_integers: true, passes: 3, toplevel: true },
-      mangle: { properties: false, toplevel: true },
-      format: { comments: false },
-    })).code;
+    javascript = (
+      await minify(wrapSource(javascript), {
+        ecma: 2020,
+        compress: { booleans_as_integers: true, passes: 3, toplevel: true },
+        mangle: { properties: false, toplevel: true },
+        format: { comments: false },
+      })
+    ).code;
     css = new CleanCSS().minify(css).styles;
     html = minifyHtml(html, {
       collapseWhitespace: true,
@@ -253,7 +268,7 @@ async function build() {
     execFileSync(advzip, ["-z", archive, "--shrink-insane"]);
     await logFileSize(archive, 13 * 1024);
     console.log("Running ect...");
-    execFileSync(ect, ["-zip", archive, "-9", "-strip"]);
+    execFileSync(ect, ["-zip", archive, "-10009", "-strip"]);
     await logFileSize(archive, 13 * 1024);
   }
 }
