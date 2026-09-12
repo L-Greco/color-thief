@@ -234,29 +234,29 @@ drawLightning = (x, y, scale = 1) => {
     spX + 18, spY - 30, 1, spX + 18, spY - 30, 28,
   );
   gradient.addColorStop(0, "#fff");
-  gradient.addColorStop(0.48, "#1af6fb");
+  gradient.addColorStop(1 / 2, "#1af6fb");
   gradient.addColorStop(1, "#0260fb");
 
   ctx.fillStyle = gradient;
   ctx.beginPath();
-  ctx.moveTo(spX + 3.31, spY - 14.63);
-  ctx.quadraticCurveTo(spX + 15.19, spY - 17.58, spX + 27.41, spY - 34);
-  ctx.lineTo(spX + 19.15, spY - 34.16);
-  ctx.lineTo(spX + 36.65, spY - 51.07);
-  ctx.quadraticCurveTo(spX + 24.1, spY - 47.79, spX + 8.43, spY - 31.04);
-  ctx.lineTo(spX + 15.52, spY - 30.06);
-  ctx.quadraticCurveTo(spX + 10.74, spY - 21.19, spX + 3.48, spY - 15.28);
+  ctx.moveTo(spX + 3, spY - 15);
+  ctx.quadraticCurveTo(spX + 15, spY - 18, spX + 27, spY - 34);
+  ctx.lineTo(spX + 19, spY - 34);
+  ctx.lineTo(spX + 37, spY - 51);
+  ctx.quadraticCurveTo(spX + 24, spY - 48, spX + 8, spY - 31);
+  ctx.lineTo(spX + 16, spY - 30);
+  ctx.quadraticCurveTo(spX + 11, spY - 21, spX + 3, spY - 15);
   ctx.closePath();
   ctx.fill();
 
   ctx.fillStyle = "#00adf7";
-  ctx.fillRect(spX + 20.8, spY - 19.06, -1.65, -1.65);
-  ctx.fillRect(spX + 4.47, spY - 26.78, -1.65, -1.65);
-  ctx.fillRect(spX + 32.52, spY - 36.13, -1.65, -1.65);
-  ctx.fillRect(spX + 18.16, spY - 47.63, -1.65, -1.65);
+  ctx.fillRect(spX + 21, spY - 19, -2, -2);
+  ctx.fillRect(spX + 4, spY - 27, -2, -2);
+  ctx.fillRect(spX + 33, spY - 36, -2, -2);
+  ctx.fillRect(spX + 18, spY - 48, -2, -2);
 
-  drawX(spX + 28.4, spY - 24.64, 0.5, "#24f5f9");
-  drawX(spX + 9.91, spY - 43.36, 0.5, "#24f5f9");
+  drawX(spX + 28, spY - 25, 1 / 2, "#24f5f9");
+  drawX(spX + 10, spY - 43, 1 / 2, "#24f5f9");
   ctx.restore();
 };
 
