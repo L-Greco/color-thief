@@ -8,6 +8,7 @@ import {
   NOMANGLE,
   assembleHtml,
   hardcodeConstants,
+  logFileSize,
   macro,
   mangle,
 } from "@remvst/js13k-tools";
@@ -234,10 +235,11 @@ async function build() {
       .trimEnd(),
   );
   const archive = join(output, "color-thief.zip");
+  console.log("Zipping...");
   execFileSync("zip", ["-q", "-9", "-X", "color-thief.zip", "index.html"], {
     cwd: output,
   });
-  console.log(`ZIP: ${(await fs.stat(archive)).size} bytes`);
+  await logFileSize(archive, 13 * 1024);
 
   if (mode === "prod") {
     const ect = join(ROOT, "Efficient-Compression-Tool", "build", "ect");
@@ -247,10 +249,12 @@ async function build() {
     const advzip = existsSync("/opt/homebrew/opt/advancecomp/bin/advzip")
       ? "/opt/homebrew/opt/advancecomp/bin/advzip"
       : "advzip";
+    console.log("Running advzip...");
     execFileSync(advzip, ["-z", archive, "--shrink-insane"]);
-    console.log(`ADVZIP: ${(await fs.stat(archive)).size} bytes`);
+    await logFileSize(archive, 13 * 1024);
+    console.log("Running ect...");
     execFileSync(ect, ["-zip", archive, "-9", "-strip"]);
-    console.log(`ECT: ${(await fs.stat(archive)).size} bytes`);
+    await logFileSize(archive, 13 * 1024);
   }
 }
 
