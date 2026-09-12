@@ -169,31 +169,31 @@ class RainbowFairyMinionArt {
     ctx.beginPath();
     ctx.moveTo(spX, spY);
     ctx.bezierCurveTo(
-      spX + 5.5,
-      spY - 1.65,
-      spX + 11.14,
-      spY + 10.58,
-      spX + 10.04,
-      spY + 13.47,
+      spX + 6,
+      spY - 2,
+      spX + 11,
+      spY + 11,
+      spX + 10,
+      spY + 13,
     );
-    ctx.quadraticCurveTo(spX + 8.39, spY + 13.61, spX + 3.02, spY + 10.58);
-    ctx.quadraticCurveTo(spX + 2.06, spY + 23.65, spX - 8.94, spY + 26.67);
-    ctx.quadraticCurveTo(spX - 7.57, spY + 35.48, spX - 15.54, spY + 34.24);
-    ctx.quadraticCurveTo(spX - 12.38, spY + 31.62, spX - 14.72, spY + 27.5);
-    ctx.quadraticCurveTo(spX - 30.53, spY + 28.05, spX - 33.42, spY + 10.17);
-    ctx.quadraticCurveTo(spX - 36.44, spY + 13.47, spX - 39.88, spY + 13.61);
+    ctx.quadraticCurveTo(spX + 8, spY + 14, spX + 3, spY + 11);
+    ctx.quadraticCurveTo(spX + 2, spY + 24, spX - 9, spY + 27);
+    ctx.quadraticCurveTo(spX - 8, spY + 35, spX - 16, spY + 34);
+    ctx.quadraticCurveTo(spX - 12, spY + 32, spX - 15, spY + 28);
+    ctx.quadraticCurveTo(spX - 31, spY + 28, spX - 33, spY + 10);
+    ctx.quadraticCurveTo(spX - 36, spY + 13, spX - 40, spY + 14);
     ctx.bezierCurveTo(
-      spX - 40.3,
-      spY + 6.18,
-      spX - 33.83,
-      spY - 0.69,
-      spX - 30.12,
-      spY - 0.42,
+      spX - 40,
+      spY + 6,
+      spX - 34,
+      spY - 1,
+      spX - 30,
+      spY,
     );
-    ctx.quadraticCurveTo(spX - 30.39, spY + 3.3, spX - 30.12, spY + 1.65);
-    ctx.quadraticCurveTo(spX - 24.76, spY - 9.49, spX - 13.34, spY - 7.98);
-    ctx.quadraticCurveTo(spX - 3.85, spY - 8.25, spX, spY + 1.37);
-    ctx.quadraticCurveTo(spX - 0.28, spY - 0.42, spX - 0.14, spY - 0.42);
+    ctx.quadraticCurveTo(spX - 30, spY + 3, spX - 30, spY + 2);
+    ctx.quadraticCurveTo(spX - 25, spY - 9, spX - 13, spY - 8);
+    ctx.quadraticCurveTo(spX - 4, spY - 8, spX, spY + 1);
+    ctx.quadraticCurveTo(spX, spY, spX, spY);
     ctx.closePath();
     ctx.fill();
 
@@ -202,38 +202,38 @@ class RainbowFairyMinionArt {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.beginPath();
-    ctx.moveTo(spX + 6.46, spY + 9.48);
-    ctx.quadraticCurveTo(spX + 2.75, spY + 7.42, spX + 0.55, spY + 3.43);
+    ctx.moveTo(spX + 6, spY + 9);
+    ctx.quadraticCurveTo(spX + 3, spY + 7, spX + 1, spY + 3);
     ctx.bezierCurveTo(
-      spX - 1.52,
-      spY + 11.69,
-      spX - 2.34,
-      spY + 5.36,
-      spX - 10.04,
-      spY + 15.4,
+      spX - 2,
+      spY + 12,
+      spX - 2,
+      spY + 5,
+      spX - 10,
+      spY + 15,
     );
     ctx.bezierCurveTo(
-      spX - 16.64,
-      spY + 5.91,
-      spX - 19.67,
-      spY + 7.42,
-      spX - 28.47,
-      spY + 6.32,
+      spX - 17,
+      spY + 6,
+      spX - 20,
+      spY + 7,
+      spX - 28,
+      spY + 6,
     );
-    ctx.quadraticCurveTo(spX - 29.84, spY + 4.95, spX - 30.26, spY + 3.16);
-    ctx.quadraticCurveTo(spX - 31.36, spY + 6.73, spX - 35.89, spY + 9.21);
+    ctx.quadraticCurveTo(spX - 30, spY + 5, spX - 30, spY + 3);
+    ctx.quadraticCurveTo(spX - 31, spY + 7, spX - 36, spY + 9);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(spX - 12.24, spY - 1.65);
-    ctx.quadraticCurveTo(spX - 14.99, spY - 4.54, spX - 16.92, spY - 1.65);
+    ctx.moveTo(spX - 12, spY - 2);
+    ctx.quadraticCurveTo(spX - 15, spY - 5, spX - 17, spY - 2);
     ctx.stroke();
 
-    const rightEyeX = spX - 7.02;
-    const eyeY = spY + 2.75;
-    const rightEyeRadius = 2.64;
-    const leftEyeX = spX - 22.56;
-    const leftEyeRadius = 2.58;
+    const rightEyeX = spX - 7;
+    const eyeY = spY + 3;
+    const rightEyeRadius = 3;
+    const leftEyeX = spX - 23;
+    const leftEyeRadius = 3;
     const eyeStartAngle = -2.7;
     ctx.beginPath();
     ctx.moveTo(
@@ -270,31 +270,31 @@ class EnemyMinionArt {
 
     ctx.fillStyle = this.createEnemyGradient(spX, spY);
     ctx.beginPath();
-    ctx.moveTo(spX + 16.32, spY - 8.93);
-    ctx.quadraticCurveTo(spX + 16.61, spY - 10.69, spX + 15.29, spY - 12.45);
-    ctx.quadraticCurveTo(spX + 23.1, spY - 9.96, spX + 22.8, spY + 2.94);
-    ctx.lineTo(spX + 15.88, spY - 1.6);
-    ctx.quadraticCurveTo(spX + 14.7, spY + 11.74, spX + 3.65, spY + 13.65);
-    ctx.quadraticCurveTo(spX + 5.57, spY + 20.1, spX - 0.91, spY + 23.91);
+    ctx.moveTo(spX + 16, spY - 9);
+    ctx.quadraticCurveTo(spX + 17, spY - 11, spX + 15, spY - 12);
+    ctx.quadraticCurveTo(spX + 23, spY - 10, spX + 23, spY + 3);
+    ctx.lineTo(spX + 16, spY - 2);
+    ctx.quadraticCurveTo(spX + 15, spY + 12, spX + 4, spY + 14);
+    ctx.quadraticCurveTo(spX + 6, spY + 20, spX - 1, spY + 24);
     ctx.bezierCurveTo(
-      spX - 2.53,
-      spY + 16.87,
-      spX - 5.63,
-      spY + 19.36,
-      spX - 7.1,
-      spY + 14.09,
+      spX - 3,
+      spY + 17,
+      spX - 6,
+      spY + 19,
+      spX - 7,
+      spY + 14,
     );
-    ctx.quadraticCurveTo(spX - 18.29, spY + 11.74, spX - 19.91, spY - 1.16);
-    ctx.lineTo(spX - 26.84, spY + 3.68);
-    ctx.quadraticCurveTo(spX - 27.28, spY - 7.91, spX - 19.91, spY - 12.16);
-    ctx.lineTo(spX - 20.36, spY - 8.49);
-    ctx.quadraticCurveTo(spX - 22.71, spY - 8.2, spX - 23.74, spY - 1.6);
-    ctx.lineTo(spX - 19.18, spY - 4.68);
-    ctx.quadraticCurveTo(spX - 20.36, spY - 17.29, spX - 8.28, spY - 20.96);
-    ctx.quadraticCurveTo(spX + 7.48, spY - 23.45, spX + 12.2, spY - 15.68);
-    ctx.quadraticCurveTo(spX + 15.44, spY - 14.65, spX + 15.58, spY - 4.83);
-    ctx.lineTo(spX + 20, spY - 1.9);
-    ctx.quadraticCurveTo(spX + 18.68, spY - 8.35, spX + 16.03, spY - 9.23);
+    ctx.quadraticCurveTo(spX - 18, spY + 12, spX - 20, spY - 1);
+    ctx.lineTo(spX - 27, spY + 4);
+    ctx.quadraticCurveTo(spX - 27, spY - 8, spX - 20, spY - 12);
+    ctx.lineTo(spX - 20, spY - 8);
+    ctx.quadraticCurveTo(spX - 23, spY - 8, spX - 24, spY - 2);
+    ctx.lineTo(spX - 19, spY - 5);
+    ctx.quadraticCurveTo(spX - 20, spY - 17, spX - 8, spY - 21);
+    ctx.quadraticCurveTo(spX + 7, spY - 23, spX + 12, spY - 16);
+    ctx.quadraticCurveTo(spX + 15, spY - 15, spX + 16, spY - 5);
+    ctx.lineTo(spX + 20, spY - 2);
+    ctx.quadraticCurveTo(spX + 19, spY - 8, spX + 16, spY - 9);
     ctx.closePath();
     ctx.fill();
 
@@ -324,10 +324,10 @@ class EnemyMinionArt {
 
     ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.moveTo(startX, eyeY + 5.57);
-    ctx.lineTo(x(-9.14), eyeY);
-    ctx.quadraticCurveTo(x(-6.04), eyeY - 2.79, x(-2.66), eyeY - 2.5);
-    ctx.quadraticCurveTo(x(1.62), eyeY + 0.58, startX, eyeY + 5.27);
+    ctx.moveTo(startX, eyeY + 6);
+    ctx.lineTo(x(-9), eyeY);
+    ctx.quadraticCurveTo(x(-6), eyeY - 3, x(-3), eyeY - 3);
+    ctx.quadraticCurveTo(x(2), eyeY + 1, startX, eyeY + 5);
     ctx.closePath();
     ctx.fill();
   }

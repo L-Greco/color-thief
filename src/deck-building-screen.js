@@ -252,7 +252,7 @@ class DeckBuildingScreen {
 
   canAddCard(cardConfig) {
     const currentCopies = this.selectedDeck.filter(
-      (selectedCard) => selectedCard.name === cardConfig.name,
+      (selectedCard) => selectedCard === cardConfig,
     ).length;
 
     return currentCopies < getDeckCopiesLimit(cardConfig);

@@ -69,7 +69,12 @@ function compactEffect(effect) {
 
 function compactCards(cards) {
   return cards.map((card) => {
-    const compact = [card.name, card.cost, card.attack ?? 0, card.health ?? 0];
+    const compact = [
+      card.type === "spell" || card.unique ? card.name : 0,
+      card.cost,
+      card.attack ?? 0,
+      card.health ?? 0,
+    ];
     if (card.text || card.effects || card.unique) compact.push(card.text || "");
     if (card.effects || card.unique) {
       compact.push(card.effects?.map(compactEffect) || 0);
@@ -89,7 +94,7 @@ async function compactCollection() {
   const rainbows = JSON.stringify(compactCards(collection.rainbowCards));
   const enemies = JSON.stringify(compactCards(collection.enemyDeckCards));
 
-  return `let _c=d=>d.map(c=>{let[n,o,a,h,t,e,u]=c,r={name:n,cost:o};return a?(r.attack=a,r.health=h):r.type="spell",t&&(r.text=t),u&&(r.unique=!0),e&&(r.effects=e),r}),unicornCards=_c(${unicorns}),rainbowCards=_c(${rainbows}),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyDeckCards=_c(${enemies}),enemyStarterDeckConfig=[...enemyDeckCards.slice(0,9).flatMap(c=>[c,c]),...enemyDeckCards.slice(9)];`;
+  return `let _n=["I","II","III","IV","V","VI","VII"],_c=(d,s)=>d.map(c=>{let[n,o,a,h,t,e,u]=c,r={name:n||s+" "+_n[o-1]+(e?" *":""),cost:o};return a?(r.attack=a,r.health=h):r.type="spell",t&&(r.text=t),u&&(r.unique=!0),e&&(r.effects=e),r}),unicornCards=_c(${unicorns},"Unicorn"),rainbowCards=_c(${rainbows},"Fairy"),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyDeckCards=_c(${enemies},"Minion"),enemyStarterDeckConfig=[...enemyDeckCards.slice(0,9).flatMap(c=>[c,c]),...enemyDeckCards.slice(9)];`;
 }
 
 function compactEffectAccess(source) {

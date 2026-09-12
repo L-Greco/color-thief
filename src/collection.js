@@ -1,6 +1,5 @@
 unicornCards = [
   {
-    name: "Tiny Hoof",
     cost: 1,
     attack: 1,
     health: 1,
@@ -16,13 +15,11 @@ unicornCards = [
     ],
   },
   {
-    name: "Sparkhorn Foal",
     cost: 1,
     attack: 2,
     health: 1,
   },
   {
-    name: "Sunbeam Unicorn",
     cost: 2,
     attack: 2,
     health: 2,
@@ -38,31 +35,21 @@ unicornCards = [
     ],
   },
   {
-    name: "Cloudmane Charger",
-    cost: 2,
-    attack: 3,
-    health: 2,
-  },
-  {
-    name: "Stable Guardian",
     cost: 2,
     attack: 2,
     health: 4,
   },
   {
-    name: "Silverhorn Knight",
     cost: 3,
     attack: 3,
     health: 4,
   },
   {
-    name: "Battle Unicorn",
     cost: 3,
     attack: 4,
     health: 3,
   },
   {
-    name: "Healing Mare",
     cost: 3,
     attack: 2,
     health: 4,
@@ -77,7 +64,11 @@ unicornCards = [
     ],
   },
   {
-    name: "Hornbreaker",
+    cost: 4,
+    attack: 4,
+    health: 5,
+  },
+  {
     cost: 4,
     attack: 4,
     health: 4,
@@ -109,7 +100,7 @@ unicornCards = [
     ],
   },
   {
-    name: "Battle Cry",
+    name: "Rally",
     type: "spell",
     cost: 1,
     text: "Give a friendly minion +2 Attack.",
@@ -123,7 +114,7 @@ unicornCards = [
     ],
   },
   {
-    name: "Golden Mane",
+    name: "Gleam",
     type: "spell",
     cost: 2,
     text: "Give a friendly minion +1/+3.",
@@ -137,7 +128,7 @@ unicornCards = [
     ],
   },
   {
-    name: "Horn Strike",
+    name: "Gore",
     type: "spell",
     cost: 2,
     text: "Deal 3 damage to an enemy minion.",
@@ -150,7 +141,7 @@ unicornCards = [
     ],
   },
   {
-    name: "Royal Blessing",
+    name: "Crown",
     type: "spell",
     cost: 3,
     text: "Give a friendly minion +2/+4.",
@@ -164,7 +155,7 @@ unicornCards = [
     ],
   },
   {
-    name: "Charge of the Herd",
+    name: "For Chroma!",
     type: "spell",
     cost: 4,
     text: "Give all friendly minions +2/+2.",
@@ -181,7 +172,6 @@ unicornCards = [
 
 rainbowCards = [
   {
-    name: "Rainbow Fairy",
     cost: 1,
     attack: 1,
     health: 1,
@@ -194,7 +184,6 @@ rainbowCards = [
     ],
   },
   {
-    name: "Color Sprite",
     cost: 1,
     attack: 1,
     health: 1,
@@ -208,7 +197,6 @@ rainbowCards = [
     ],
   },
   {
-    name: "Prism Pixie",
     cost: 2,
     attack: 1,
     health: 2,
@@ -222,7 +210,6 @@ rainbowCards = [
     ],
   },
   {
-    name: "Paint Sprite",
     cost: 2,
     attack: 2,
     health: 2,
@@ -237,7 +224,6 @@ rainbowCards = [
     ],
   },
   {
-    name: "Spectrum Fae",
     cost: 3,
     attack: 2,
     health: 3,
@@ -251,7 +237,6 @@ rainbowCards = [
     ],
   },
   {
-    name: "Aurora Fae",
     cost: 3,
     attack: 2,
     health: 3,
@@ -266,7 +251,6 @@ rainbowCards = [
     ],
   },
   {
-    name: "Prism Queen",
     cost: 5,
     attack: 4,
     health: 4,
@@ -285,7 +269,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Rainbow Spark",
+    name: "Spark",
     type: "spell",
     cost: 1,
     text: "Draw 1 card.",
@@ -297,7 +281,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Color Splash",
+    name: "Splash",
     type: "spell",
     cost: 1,
     text: "Deal 2 damage to an enemy minion.",
@@ -310,7 +294,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Prism Bolt",
+    name: "Flash",
     type: "spell",
     cost: 2,
     text: "Deal 2 damage to an enemy minion. Draw 1 card.",
@@ -327,7 +311,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Chromatic Shield",
+    name: "Ward",
     type: "spell",
     cost: 1,
     text: "Give a friendly minion +1/+2.",
@@ -341,7 +325,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Refraction",
+    name: "Split",
     type: "spell",
     cost: 3,
     text: "Draw 2 cards.",
@@ -353,7 +337,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Rainbow Beam",
+    name: "Beam",
     type: "spell",
     cost: 3,
     text: "Deal 4 damage to an enemy minion.",
@@ -366,7 +350,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "Color Wave",
+    name: "Wave",
     type: "spell",
     cost: 4,
     text: "Deal 3 damage to all enemy minions.",
@@ -379,7 +363,7 @@ rainbowCards = [
     ],
   },
   {
-    name: "The Last Rainbow",
+    name: "Last Light",
     type: "spell",
     cost: 7,
     unique: true,
@@ -426,13 +410,11 @@ inferCardTheme = (cardConfig) => {
 
 enemyDeckCards = [
   {
-    name: "Grey Grunt",
     cost: 1,
     attack: 2,
     health: 3,
   },
   {
-    name: "Shade Snatcher",
     cost: 2,
     attack: 3,
     health: 3,
@@ -446,7 +428,6 @@ enemyDeckCards = [
     ],
   },
   {
-    name: "Pigment Parasite",
     cost: 2,
     attack: 2,
     health: 4,
@@ -461,19 +442,16 @@ enemyDeckCards = [
     ],
   },
   {
-    name: "Hue Hunter",
     cost: 3,
     attack: 4,
     health: 4,
   },
   {
-    name: "Color Crusher",
     cost: 4,
     attack: 5,
     health: 5,
   },
   {
-    name: "Prism Breaker",
     cost: 4,
     attack: 4,
     health: 6,
@@ -488,13 +466,12 @@ enemyDeckCards = [
     ],
   },
   {
-    name: "Void Beast",
     cost: 6,
     attack: 7,
     health: 7,
   },
   {
-    name: "Drain Color",
+    name: "Siphon",
     type: "spell",
     cost: 2,
     text: "Deal 3 damage to an enemy minion. Restore 2 Health.",
@@ -511,7 +488,7 @@ enemyDeckCards = [
     ],
   },
   {
-    name: "Fade Away",
+    name: "Fade",
     type: "spell",
     cost: 3,
     text: "Deal 4 damage to an enemy minion and 1 damage to the enemy hero.",
@@ -544,7 +521,7 @@ enemyDeckCards = [
     ],
   },
   {
-    name: "Total Desaturation",
+    name: "Greyfall",
     type: "spell",
     cost: 7,
     unique: true,
@@ -562,6 +539,20 @@ enemyDeckCards = [
     ],
   },
 ];
+
+latin = ["I", "II", "III", "IV", "V", "VI", "VII"];
+
+setMinionNames = (cards, faction) => {
+  cards.forEach((card) => {
+    if (!card.name) {
+      card.name = `${faction} ${latin[card.cost - 1]}${card.effects ? " *" : ""}`;
+    }
+  });
+};
+
+setMinionNames(unicornCards, "Unicorn");
+setMinionNames(rainbowCards, "Fairy");
+setMinionNames(enemyDeckCards, "Minion");
 
 enemyStarterDeckConfig = [
   ...enemyDeckCards.slice(0, 9).flatMap((card) => [card, card]),
