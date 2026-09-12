@@ -52,12 +52,16 @@ Other useful commands:
 
 ```bash
 npm run debug
+npm run debug -- victory
 npm run build
 npm run preview
 ```
 
-- `npm run debug` starts the development server in the deck-building debug
-  state.
+- `npm run debug` starts the development server at `http://localhost:4176` in
+  the deck-building debug state, so it can run alongside `npm run dev`.
+- Append `-- intro`, `-- deckBuilding`, `-- battle`, `-- victory`, or
+  `-- defeat` to open a specific debug state, for example
+  `npm run debug -- victory`.
 - `npm run build` runs the production minification and compression pipeline.
 - `npm run preview` serves the current production output locally.
 

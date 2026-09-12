@@ -49,8 +49,8 @@ const argv = yargs(process.argv.slice(2))
 const mode =
   argv._[0] || (argv.debug ? "debug" : argv.mangle ? "mangled" : "prod");
 
-if (!["debug", "mangled", "preprod", "prod"].includes(mode)) {
-  throw new Error("Usage: node tools/build.mjs [debug|mangled|preprod|prod]");
+if (!["debug", "mangled", "prod"].includes(mode)) {
+  throw new Error("Usage: node tools/build.mjs [debug|mangled|prod]");
 }
 
 function compactEffect(effect) {

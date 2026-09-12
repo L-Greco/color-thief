@@ -1,15 +1,14 @@
 {
   "name": "color-thief-js13k",
+  "author": "Kostantinos Makaronas <makaronaskonstandinos@gmail.com> (https://github.com/L-Greco)",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "node tools/serve.mjs . 4173",
-    "debug": "node tools/serve.mjs . 4173 deckBuilding",
+    "debug": "node tools/serve.mjs . 4176 deckBuilding",
     "build": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs prod",
     "build:debug": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs debug",
     "build:mangled": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs mangled",
-    "build:preprod": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs preprod",
-    "build:prod": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs prod",
     "preview": "node tools/serve.mjs build/prod 4174",
     "preview:debug": "node tools/serve.mjs build/debug 4175 deckBuilding",
     "zip:prod": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs prod"
