@@ -5,17 +5,21 @@
   "scripts": {
     "dev": "node tools/serve.mjs . 4173",
     "debug": "node tools/serve.mjs . 4173 deckBuilding",
-    "build": "node tools/build.mjs prod",
-    "build:debug": "node tools/build.mjs debug",
-    "build:mangled": "node tools/build.mjs mangled",
-    "build:preprod": "node tools/build.mjs preprod",
-    "build:prod": "node tools/build.mjs prod",
+    "build": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs prod",
+    "build:debug": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs debug",
+    "build:mangled": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs mangled",
+    "build:preprod": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs preprod",
+    "build:prod": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs prod",
     "preview": "node tools/serve.mjs build/prod 4174",
     "preview:debug": "node tools/serve.mjs build/debug 4175 deckBuilding",
-    "zip:prod": "node tools/build.mjs prod"
+    "zip:prod": "node --no-warnings --experimental-loader ./tools/js13k-tools-loader.mjs tools/build.mjs prod"
   },
   "devDependencies": {
+    "@remvst/js13k-tools": "^1.0.0",
+    "clean-css": "^5.3.3",
+    "html-minifier": "^4.0.0",
     "roadroller": "^2.1.0",
-    "terser": "^5.44.0"
+    "terser": "^5.44.0",
+    "yargs": "^18.1.0"
   }
 }

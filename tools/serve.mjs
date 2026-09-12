@@ -1,11 +1,14 @@
 import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, normalize, resolve, sep } from "node:path";
+import { SOURCE_FILES } from "./source-files.mjs";
 
 const root = resolve(process.argv[2] || ".");
 const port = Number(process.argv[3]) || 4173;
 const state = process.argv.slice(4).at(-1);
 const debugFile = resolve(root, "src/debug.js");
+const cssMarker = "{{{ CSS_INJECTION_SITE }}}";
+const jsMarker = "{{{ JS_INJECTION_SITE }}}";
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -26,12 +29,18 @@ createServer((request, response) => {
   try {
     const target = statSync(file).isDirectory() ? resolve(file, "index.html") : file;
 
-    if (state && target === resolve(root, "index.html") && existsSync(debugFile)) {
-      const html = readFileSync(target, "utf8").replace(
-        '<script src="./src/main.js"></script>',
-        '<script src="./src/main.js"></script>\n    <script src="./src/debug.js"></script>',
-      );
-      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }).end(html);
+    const html = target === resolve(root, "index.html") && readFileSync(target, "utf8");
+    if (html?.includes(cssMarker)) {
+      const files = state && existsSync(debugFile)
+        ? [...SOURCE_FILES, "src/debug.js"]
+        : SOURCE_FILES;
+      const javascript = files
+        .map((file) => readFileSync(resolve(root, file), "utf8"))
+        .join("\n");
+      const page = html
+        .replace(cssMarker, readFileSync(resolve(root, "styles.css"), "utf8"))
+        .replace(jsMarker, javascript);
+      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }).end(page);
       return;
     }
 
