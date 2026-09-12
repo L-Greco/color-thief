@@ -19,8 +19,6 @@ import yargs from "yargs/yargs";
 import { SOURCE_FILES } from "./source-files.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const CARD_TYPES = ["minion", "spell"];
-const EFFECT_TRIGGERS = ["onDeath"];
 const EFFECT_TYPES = ["draw", "heal", "damage", "buff", "returnToHand"];
 const EFFECT_TARGETS = [
   "friendlyMinion",
@@ -35,146 +33,9 @@ const LITERAL_CONSTANTS = {
   null: 0,
   Infinity: 999,
 };
-const FORCED_NAMES = [
-  "accent",
-  "amount",
-  "attack",
-  "attackDirectionX",
-  "attackDirectionY",
-  "attackEffectTime",
-  "attackOffsetX",
-  "attackOffsetY",
-  "attackRotation",
-  "attackScaleBoost",
-  "artBg",
-  "background",
-  "banner",
-  "battle",
-  "board",
-  "border",
-  "canAttack",
-  "canLeave",
-  "card",
-  "cardScale",
-  "cards",
-  "cardsPerPage",
-  "center",
-  "closeRect",
-  "color",
-  "controller",
-  "cost",
-  "deathEffectTime",
-  "deathOverlayAlpha",
-  "deathRise",
-  "deathScale",
-  "deck",
-  "dragCard",
-  "dragOffset",
-  "drawAlpha",
-  "drawEffectDelay",
-  "drawEffectTime",
-  "drawStartX",
-  "drawStartY",
-  "drawTargetX",
-  "drawTargetY",
-  "effectBg",
-  "effects",
-  "ended",
-  "enemy",
-  "enemyBoard",
-  "enemyDeckRect",
-  "enemyHeroRect",
-  "enemyPreviewCard",
-  "enemyPreviewTimer",
-  "enemyStatus",
-  "enemyStepDelay",
-  "enemyStepTimer",
-  "frame",
-  "game",
-  "gameInfoModal",
-  "glow",
-  "hand",
-  "health",
-  "hitEffectTime",
-  "hitOverlayAlpha",
-  "hitRotation",
-  "hoverDuration",
-  "hoverProgress",
-  "hovered",
-  "innerBorder",
-  "isCloseHovered",
-  "isDying",
-  "isOpen",
-  "isTargetSource",
-  "key",
-  "knownPlayerHandCards",
-  "kind",
-  "label",
-  "lastStatusAt",
-  "mana",
-  "maxHealth",
-  "maxMana",
-  "message",
-  "minion",
-  "mulliganActive",
-  "mulliganCards",
-  "mulliganKeepRect",
-  "mulliganRedrawRect",
-  "name",
-  "nextPageRect",
-  "ok",
-  "opponent",
-  "outcome",
-  "paper",
-  "pendingMinionDeaths",
-  "player",
-  "playerBoard",
-  "playerDeckConfig",
-  "playerDeckRect",
-  "playerHand",
-  "playerHeroRect",
-  "playerStatus",
-  "prevPageRect",
-  "promptTime",
-  "radius",
-  "reason",
-  "rect",
-  "restorationProgress",
-  "screen",
-  "selectedAction",
-  "selectedDeck",
-  "selectedSource",
-  "sortedSourceCards",
-  "source",
-  "sourceCardsPage",
-  "sourceDeckButtons",
-  "stars",
-  "startBattleRect",
-  "statusMessage",
-  "storyTime",
-  "suppressClick",
-  "target",
-  "targetType",
-  "text",
-  "theme",
-  "thiefMusicStarted",
-  "titleExitProgress",
-  "transparentBackground",
-  "trigger",
-  "turn",
-  "turnOwner",
-  "turnPhase",
-  "type",
-  "unique",
-  "value",
-  "victoryThemeStarted",
-  "victoryTime",
-  "xVelocity",
-  "yVelocity",
-];
 const MANGLE_OPTIONS = {
-  skip: ["constructor", "repeat", "zzfx", "zzfxV", "zzfxX"],
-  force: FORCED_NAMES,
+  skip: ["constructor", "repeat", "roundRect", "zzfx", "zzfxV", "zzfxX"],
+  force: [],
 };
 const argv = yargs(process.argv.slice(2)).options({
   debug: { type: "boolean", default: false },
@@ -188,26 +49,34 @@ if (!["debug", "mangled", "preprod", "prod"].includes(mode)) {
 }
 
 function compactEffect(effect) {
-  return [
-    effect.trigger ? EFFECT_TRIGGERS.indexOf(effect.trigger) : -1,
-    EFFECT_TYPES.indexOf(effect.type),
-    effect.target ? EFFECT_TARGETS.indexOf(effect.target) : -1,
-    effect.amount || 0,
-    effect.attack || 0,
-    effect.health || 0,
+  const type = EFFECT_TYPES.indexOf(effect.type);
+  const compact = [
+    type + (effect.trigger === "onDeath" ? 8 : 0),
+    effect.target ? EFFECT_TARGETS.indexOf(effect.target) + 1 : 0,
   ];
+  if (type === 3) {
+    compact.push(effect.attack || 0, effect.health || 0);
+  } else if (type < 3) {
+    compact.push(effect.amount || 0);
+  }
+  return compact;
 }
 
 function compactCards(cards) {
-  return cards.map((card) => [
-    card.name,
-    CARD_TYPES.indexOf(card.type || "minion"),
-    card.cost,
-    card.attack ?? 0,
-    card.health ?? 0,
-    card.effects?.map(compactEffect) || 0,
-    card.unique ? 1 : 0,
-  ]);
+  return cards.map((card) => {
+    const compact = [
+      card.name,
+      card.cost,
+      card.attack ?? 0,
+      card.health ?? 0,
+    ];
+    if (card.text || card.effects || card.unique) compact.push(card.text || "");
+    if (card.effects || card.unique) {
+      compact.push(card.effects?.map(compactEffect) || 0);
+    }
+    if (card.unique) compact.push(1);
+    return compact;
+  });
 }
 
 async function compactCollection() {
@@ -220,7 +89,35 @@ async function compactCollection() {
   const rainbows = JSON.stringify(compactCards(collection.rainbowCards));
   const enemies = JSON.stringify(compactCards(collection.enemyStarterDeckConfig));
 
-  return `let _t=${JSON.stringify(CARD_TYPES)},_r=${JSON.stringify(EFFECT_TRIGGERS)},_e=${JSON.stringify(EFFECT_TYPES)},_g=${JSON.stringify(EFFECT_TARGETS)},_c=d=>d.map(c=>{let[n,t,o,a,h,e,u]=c,r={name:n,type:_t[t],cost:o};return t||(r.attack=a,r.health=h),u&&(r.unique=!0),e&&(r.effects=e.map(e=>{let[r,t,g,o,a,h]=e,c={type:_e[t]};return r>=0&&(c.trigger=_r[r]),g>=0&&(c.target=_g[g]),o&&(c.amount=o),a&&(c.attack=a),h&&(c.health=h),c})),r}),unicornCards=_c(${unicorns}),rainbowCards=_c(${rainbows}),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyStarterDeckConfig=_c(${enemies});`;
+  return `let _c=d=>d.map(c=>{let[n,o,a,h,t,e,u]=c,r={name:n,cost:o};return a?(r.attack=a,r.health=h):r.type="spell",t&&(r.text=t),u&&(r.unique=!0),e&&(r.effects=e),r}),unicornCards=_c(${unicorns}),rainbowCards=_c(${rainbows}),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyStarterDeckConfig=_c(${enemies});`;
+}
+
+function compactEffectAccess(source) {
+  const targetCodes = Object.fromEntries(
+    EFFECT_TARGETS.map((target, index) => [target, index + 1]),
+  );
+  const typeCodes = Object.fromEntries(
+    EFFECT_TYPES.map((type, index) => [type, index]),
+  );
+
+  source = source.replace(
+    /!effect\.trigger \|\| effect\.trigger === trigger/g,
+    "effect[0]<8||trigger",
+  );
+  source = source.replace(
+    /effect\.type === "(draw|heal|damage|buff|returnToHand)"/g,
+    (_, type) => `effect[0]%8===${typeCodes[type]}`,
+  );
+  source = source.replace(/effects\[i\]\.target/g, "effects[i][1]");
+  source = source.replace(
+    /effect\.(target|amount|attack|health)/g,
+    (_, field) => `effect[${{ target: 1, amount: 2, attack: 2, health: 3 }[field]}]`,
+  );
+  source = source.replace(
+    /"(friendlyMinion|enemyMinion|allFriendlyMinions|allEnemyMinions)"/g,
+    (_, target) => `${targetCodes[target]}`,
+  );
+  return source.replace(/"onPlay"/g, "0").replace(/"onDeath"/g, "1");
 }
 
 async function readSource(debug) {
@@ -229,9 +126,7 @@ async function readSource(debug) {
     if (!debug && file === "src/constants.js") return "";
     if (!debug && file === "src/collection.js") return compactCollection();
     const source = await fs.readFile(join(ROOT, file), "utf8");
-    return !debug && file === "src/audio/zzfx.js"
-      ? `/*nomangle*/${source}/*/nomangle*/`
-      : source;
+    return source;
   }));
   return parts.join("\n");
 }
@@ -269,6 +164,13 @@ function expandTemplates(source) {
   );
 }
 
+function protectLiterals(source) {
+  return source.replace(
+    /"(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*'/g,
+    (literal) => `/*nomangle*/${literal}/*/nomangle*/`,
+  );
+}
+
 function wrapSource(source) {
   const ignored = new Set(["zzfx", "zzfxV", "zzfxX"]);
   const names = [...source.matchAll(/^([A-Za-z_$][\w$]*)\s*=/gm)]
@@ -295,17 +197,16 @@ async function build() {
     fs.readFile(join(ROOT, "styles.css"), "utf8"),
     readSource(debug),
   ]);
+  const canvas = !debug && html.match(/<canvas\b[^>]*><\/canvas>/i)?.[0];
 
   if (!debug) {
+    if (canvas) {
+      html = html.replace(canvas, "CANVAS_INJECTION_SITE");
+    }
+    javascript = compactEffectAccess(javascript);
     javascript = hardcodeConstants(expandTemplates(javascript), await readConstants());
     javascript = macro(macro(javascript, NOMANGLE), EVALUATE);
-    const methods = [...javascript.matchAll(/^  ([A-Za-z_$][\w$]*)\(/gm)]
-      .map(([, name]) => name)
-      .filter((name) => name !== "constructor");
-    javascript = mangle(javascript, {
-      ...MANGLE_OPTIONS,
-      force: [...FORCED_NAMES, ...methods],
-    });
+    javascript = mangle(protectLiterals(javascript), MANGLE_OPTIONS);
     javascript = (await minify(wrapSource(javascript), {
       ecma: 2020,
       compress: { booleans_as_integers: true, passes: 3, toplevel: true },
@@ -328,7 +229,9 @@ async function build() {
   await fs.mkdir(output, { recursive: true });
   await fs.writeFile(
     join(output, "index.html"),
-    assembleHtml({ html, css, js: javascript }).trimEnd(),
+    assembleHtml({ html, css, js: javascript })
+      .replace("CANVAS_INJECTION_SITE", canvas || "")
+      .trimEnd(),
   );
   const archive = join(output, "color-thief.zip");
   execFileSync("zip", ["-q", "-9", "-X", "color-thief.zip", "index.html"], {

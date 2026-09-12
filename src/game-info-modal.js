@@ -1,27 +1,27 @@
 const GAME_INFO_RULES = [
   [
-    "Build a deck",
-    "Choose 20 cards from the Unicorn and Rainbow collections before battle.",
+    "Deck building",
+    "Build a 20-card Unicorn and Rainbow deck.",
   ],
   [
-    "Mulligan and hand",
-    "Start with 4 cards. Before turn one, you may replace any of them. Your hand can hold up to 7 cards.",
-  ],
-  [
-    "Grow your mana",
-    "Your mana refills and grows by 1 each turn, up to 10.",
+    "Hand and mana",
+    "Start with 4 cards. Mulligan before turn one. Hand: 7. Mana grows to 10.",
   ],
   [
     "Play cards",
-    "Drag a card onto the highlighted player zone to play it. For target cards, click the card, then left-click its target.",
+    "Drag spells and minions without effects to the highlighted zone.",
   ],
   [
-    "Attack wisely",
-    "Minions cannot attack on the turn they are played. You can have 5 minions on the board.",
+    "Targets and On Play",
+    "Choose a target first. On Play effects trigger when played.",
   ],
   [
-    "Win the battle",
-    "Reduce the Color Thief to 0 HP before your own hero reaches 0 HP.",
+    "Board",
+    "New minions go right. They cannot attack that turn. Max 5.",
+  ],
+  [
+    "Win",
+    "Reduce the Color Thief to 0 HP first.",
   ],
 ];
 
@@ -138,7 +138,7 @@ class GameInfoModal {
     ctx.fillStyle = "#c1cde7";
     ctx.font = "18px Arial";
     ctx.fillText(
-      "Build a deck of Unicorns and Rainbows, then take back the stolen color.",
+      "Build your deck and reclaim the stolen color.",
       panel.x + 54,
       panel.y + 146,
     );
@@ -218,7 +218,7 @@ class GameInfoModal {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(
-      "Press I or Esc to close",
+      "I or Esc: close",
       canvas.width / 2,
       panel.y + 578,
     );
