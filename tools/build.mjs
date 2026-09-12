@@ -90,11 +90,9 @@ async function compactCollection() {
   );
   const unicorns = JSON.stringify(compactCards(collection.unicornCards));
   const rainbows = JSON.stringify(compactCards(collection.rainbowCards));
-  const enemies = JSON.stringify(
-    compactCards(collection.enemyStarterDeckConfig),
-  );
+  const enemies = JSON.stringify(compactCards(collection.enemyDeckCards));
 
-  return `let _c=d=>d.map(c=>{let[n,o,a,h,t,e,u]=c,r={name:n,cost:o};return a?(r.attack=a,r.health=h):r.type="spell",t&&(r.text=t),u&&(r.unique=!0),e&&(r.effects=e),r}),unicornCards=_c(${unicorns}),rainbowCards=_c(${rainbows}),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyStarterDeckConfig=_c(${enemies});`;
+  return `let _c=d=>d.map(c=>{let[n,o,a,h,t,e,u]=c,r={name:n,cost:o};return a?(r.attack=a,r.health=h):r.type="spell",t&&(r.text=t),u&&(r.unique=!0),e&&(r.effects=e),r}),unicornCards=_c(${unicorns}),rainbowCards=_c(${rainbows}),unicornCollection={key:"unicorn",label:"Unicorns",accent:"#ff9ecf",cards:unicornCards},rainbowCollection={key:"rainbow",label:"Rainbow Fairies",accent:"#7fd7ff",cards:rainbowCards},playerDeckSources=[unicornCollection,rainbowCollection],getDeckCopiesLimit=c=>c.unique?1:DEFAULT_DECK_COPIES,inferCardTheme=c=>unicornCards.includes(c)?"unicorn":rainbowCards.includes(c)?"rainbow":enemyStarterDeckConfig.includes(c)?"enemy":"neutral",enemyDeckCards=_c(${enemies}),enemyStarterDeckConfig=[...enemyDeckCards.slice(0,9).flatMap(c=>[c,c]),...enemyDeckCards.slice(9)];`;
 }
 
 function compactEffectAccess(source) {
